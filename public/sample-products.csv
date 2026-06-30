@@ -1,0 +1,4 @@
+sku,title,slug,price,salePrice,stockQuantity,categoryName,categorySlug,brandName,brandSlug,imageUrl,seoTitle,seoDescription
+SKU-1001,Premium Blue Shirt,premium-blue-shirt,1299,999,50,Mens Fashion,mens-fashion,Speed Brand,speed-brand,https://images.unsplash.com/photo-1521572163474-6864f9cf17ab,Premium Blue Shirt | Buy Online,Buy premium blue shirt online with fast delivery.
+SKU-1002,Running Sport Shoes,running-sport-shoes,2499,1999,80,Shoes,shoes,Speed Brand,speed-brand,https://images.unsplash.com/photo-1542291026-7eec264c27ff,Running Sport Shoes | Buy Online,Lightweight running shoes for everyday training.
+SKU-1003,Smart Office Watch,smart-office-watch,3999,3499,25,Accessories,accessories,Demo Brand,demo-brand,https://images.unsplash.com/photo-1523275335684-37898b6baf30,Smart Office Watch | Buy Online,Modern office watch with premium design.

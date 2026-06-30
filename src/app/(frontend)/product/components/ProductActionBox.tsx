@@ -1,0 +1,197 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { AddToCartButton } from '@/components/AddToCartButton';
+import { BuyNowButton } from '@/components/BuyNowButton';
+import { WishlistButton } from './WishlistButton';
+// Fallback simple formatter since formatPrice is async in this project
+function formatMoney(amount: string | number) {
+  const num = Number(amount);
+  const formatted = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(num);
+  return `${formatted} CAD`;
+}
+
+export function ProductActionBox({ 
+  product 
+}: { 
+  product: any 
+}) {
+  const variants = product.variants || [];
+  
+  // Try to pre-select a variant based on URL hash or just use base product defaults
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hashId = window.location.hash.replace('#variant-', '');
+      if (variants.find((v: any) => v.id.toString() === hashId)) {
+        setSelectedVariantId(hashId);
+      }
+    } else if (variants.length > 0) {
+      // Default to first variant if none selected
+      setSelectedVariantId(variants[0].id.toString());
+    }
+  }, [variants]);
+
+  const selectedVariant = variants.find((v: any) => v.id.toString() === selectedVariantId) || null;
+
+  const currentPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.basePrice);
+  const currentSalePrice = selectedVariant ? (selectedVariant.salePrice ? Number(selectedVariant.salePrice) : null) : (product.salePrice ? Number(product.salePrice) : null);
+  const currentStock = selectedVariant ? selectedVariant.stockQuantity : product.stockQuantity;
+
+  let discountPercentage = 0;
+  if (currentSalePrice && currentPrice > 0) {
+    discountPercentage = Math.round(((currentPrice - currentSalePrice) / currentPrice) * 100);
+  }
+
+  // Handle image update dispatch
+  useEffect(() => {
+    if (selectedVariant && selectedVariant.image && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('variantImageChanged', { detail: selectedVariant.image }));
+    }
+  }, [selectedVariant]);
+
+  // Group attributes for rendering selector
+  const attributeGroups: Record<string, string[]> = {};
+  variants.forEach((v: any) => {
+    if (v.attributes) {
+      Object.entries(v.attributes).forEach(([key, val]) => {
+        // Skip Shopify's default empty variant attribute
+        if (key === 'Title' && val === 'Default Title') return;
+        
+        if (!attributeGroups[key]) attributeGroups[key] = [];
+        if (!attributeGroups[key].includes(val as string)) attributeGroups[key].push(val as string);
+      });
+    }
+  });
+
+  // Find the currently selected attributes
+  const currentAttributes = selectedVariant?.attributes || {};
+
+  const handleAttributeSelect = (key: string, val: string) => {
+    const newAttrs = { ...currentAttributes, [key]: val };
+    // Find the variant that matches these attributes best
+    const bestMatch = variants.find((v: any) => {
+      return Object.entries(newAttrs).every(([k, vVal]) => !v.attributes || v.attributes[k] === vVal);
+    });
+    if (bestMatch) {
+      setSelectedVariantId(bestMatch.id.toString());
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', `#variant-${bestMatch.id.toString()}`);
+      }
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      
+      {/* Pricing */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
+        {currentSalePrice ? (
+          <>
+            <span style={{ fontSize: '36px', fontWeight: 900, color: '#D63062', letterSpacing: '-0.02em', lineHeight: 1 }}>{formatMoney(currentSalePrice)}</span>
+            <span style={{ fontSize: '20px', fontWeight: 600, color: '#94a3b8', textDecoration: 'line-through', marginBottom: '4px' }}>{formatMoney(currentPrice)}</span>
+            {discountPercentage > 0 && (
+              <span style={{ background: '#fef2f2', color: '#ef4444', padding: '4px 8px', borderRadius: '4px', fontSize: '13px', fontWeight: 800, marginBottom: '6px' }}>
+                {discountPercentage}% OFF
+              </span>
+            )}
+          </>
+        ) : (
+          <span style={{ fontSize: '36px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1 }}>{formatMoney(currentPrice)}</span>
+        )}
+      </div>
+
+      {/* Brand */}
+      {product.brand && (
+        <div style={{ fontSize: '14px', color: '#64748b' }}>
+          Brand: <a href={`/brand/${product.brand.slug}`} style={{ color: '#3b82f6', fontWeight: 700, textDecoration: 'none' }}>{product.brand.name}</a>
+        </div>
+      )}
+
+      {/* Short Description */}
+      <div style={{ color: '#475569', fontSize: '15px', lineHeight: 1.6 }}>
+        {product.shortDescription}
+        {Array.isArray(product.benefits) && product.benefits.length > 0 && (
+          <ul style={{ paddingLeft: '20px', marginTop: '12px' }}>
+            {(product.benefits as string[]).slice(0,3).map((benefit, i) => <li key={i} style={{ marginBottom: '4px' }}>{String(benefit)}</li>)}
+          </ul>
+        )}
+      </div>
+
+      {/* Stock Status */}
+      <div style={{ fontWeight: 700, fontSize: '14px', color: currentStock > 0 ? '#10b981' : '#ef4444', paddingBottom: '12px', borderBottom: '1px solid #e2e8f0' }}>
+        {currentStock > 0 ? `Availability: ${currentStock} in stock` : 'Out of Stock'}
+      </div>
+
+      {/* Dynamic Meta Data (SKU & Barcode) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '14px', color: '#64748b' }}>
+        <div>
+          <strong style={{ color: '#0f172a' }}>SKU:</strong> <span>{selectedVariant?.sku || product.sku}</span>
+        </div>
+        {(selectedVariant?.barcode || product.barcode) && (
+          <div>
+            <strong style={{ color: '#0f172a' }}>Barcode:</strong> <span>{selectedVariant?.barcode || product.barcode}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Variant Selector */}
+      {Object.keys(attributeGroups).length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '8px 0' }}>
+          {Object.entries(attributeGroups).map(([key, options]) => (
+            <div key={key}>
+              <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '8px', color: '#0f172a' }}>{key}: <span style={{ color: '#64748b', fontWeight: 500 }}>{currentAttributes[key]}</span></div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {options.map(opt => {
+                  const isSelected = currentAttributes[key] === opt;
+                  return (
+                    <button
+                      key={opt}
+                      onClick={() => handleAttributeSelect(key, opt)}
+                      style={{
+                        padding: '8px 16px',
+                        border: isSelected ? '2px solid #0f172a' : '1px solid #cbd5e1',
+                        background: isSelected ? '#f8fafc' : '#ffffff',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: isSelected ? 700 : 500,
+                        color: '#0f172a',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Action Box */}
+      <div style={{ display: 'flex', gap: '12px', marginTop: '8px', alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <AddToCartButton 
+            productId={product.id.toString()} 
+            variantId={selectedVariantId || undefined} 
+            outOfStock={currentStock <= 0} 
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <BuyNowButton 
+            productId={product.id.toString()} 
+            outOfStock={currentStock <= 0} 
+          />
+        </div>
+        <div style={{ flexShrink: 0 }}>
+          <WishlistButton 
+            productId={product.id.toString()} 
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
