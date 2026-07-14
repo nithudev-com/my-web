@@ -43,7 +43,7 @@ export function ProductTabs({ productId, reviewsCount, hasFaqs, hasDetails = fal
   };
 
   return (
-    <div style={{ marginTop: '64px' }}>
+    <div style={{ marginTop: '32px' }}>
       
       {/* Accordion Sections */}
       <div style={{ borderTop: '1px solid #e2e8f0' }}>
@@ -82,7 +82,7 @@ export function ProductTabs({ productId, reviewsCount, hasFaqs, hasDetails = fal
       </div>
 
       {/* Persistent Customer Reviews Section */}
-      <div style={{ marginTop: '64px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
+      <div style={{ marginTop: '40px', borderTop: '1px solid #e2e8f0', paddingTop: '32px' }}>
         <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#0f172a', marginBottom: '24px' }}>Customer reviews</h2>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>

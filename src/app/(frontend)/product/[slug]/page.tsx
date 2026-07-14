@@ -112,7 +112,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
 
   return (
-    <main className="container" style={{ paddingBottom: '120px', paddingTop: '20px', position: 'relative' }}>
+    <main className="container" style={{ paddingBottom: '90px', paddingTop: '16px', position: 'relative' }}>
       <style dangerouslySetInnerHTML={{
         __html: `
         .mobile-only-title { display: none; }
@@ -180,7 +180,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      <div className="pdp-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr 320px", gap: '48px', marginBottom: '60px', alignItems: 'start' }}>
+      <div className="pdp-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr 320px", gap: '48px', marginBottom: '24px', alignItems: 'start' }}>
 
         {/* LEFT COLUMN: Gallery */}
         <ProductGallery images={images} />
@@ -373,8 +373,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       {/* RELATED PRODUCTS */}
       {relatedProducts.length > 0 && (
-        <div style={{ marginTop: '80px', borderTop: '1px solid #e2e8f0', paddingTop: '80px' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '32px', color: '#0f172a' }}>You May Also Like</h2>
+        <div style={{ marginTop: '48px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '24px', color: '#0f172a' }}>You May Also Like</h2>
           <div className="related-products-grid">
             {relatedProducts.map((rp) => (
               <ProductCard
@@ -397,8 +397,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       {/* RELATED AI BLOGS (Custom styled grid from image) */}
       {relatedBlogs.length > 0 && (
-        <div style={{ marginTop: '80px', borderTop: '1px solid #e2e8f0', paddingTop: '80px' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '32px', color: '#0f172a' }}>Related Articles</h2>
+        <div style={{ marginTop: '48px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '24px', color: '#0f172a' }}>Related Articles</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
             {relatedBlogs.map((blog: any) => (
               <Link key={blog.id.toString()} href={`/blog/${blog.slug}`} style={{ textDecoration: 'none' }}>
