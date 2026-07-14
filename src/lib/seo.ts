@@ -40,9 +40,11 @@ export function productJsonLd(product: any) {
     brand: product.brand
       ? {
           "@type": "Brand",
-          name: product.brand.name
+          name: product.brand.name,
+          url: siteUrl(`/brand/${product.brand.slug}`)
         }
       : undefined,
+    category: product.category ? product.category.name : undefined,
     offers: {
       "@type": "Offer",
       url: siteUrl(`/product/${product.slug}`),
@@ -54,6 +56,10 @@ export function productJsonLd(product: any) {
         product.stockStatus === "IN_STOCK" || (product.stockQuantity && product.stockQuantity > 0)
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
+      seller: {
+        "@type": "Organization",
+        name: "SexToys Lovers"
+      },
       hasMerchantReturnPolicy: {
         "@type": "MerchantReturnPolicy",
         applicableCountry: "CA",
