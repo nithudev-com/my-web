@@ -1,8 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { ReviewForm } from './ReviewForm';
-import { verifyPurchaseStatus } from '@/actions/reviews';
+import React, { useState } from 'react';
 
 interface ProductTabsProps {
   productId: string;
@@ -15,72 +13,106 @@ interface ProductTabsProps {
   detailsNode?: React.ReactNode;
 }
 
+const AccordionItem = ({ title, icon, isOpen, onClick, children }: any) => (
+  <div style={{ borderBottom: '1px solid #e2e8f0' }}>
+    <button 
+      onClick={onClick}
+      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 0', background: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#0f172a', fontWeight: 600, fontSize: '18px' }}>
+        {icon}
+        {title}
+      </div>
+      <div style={{ color: '#0f172a', fontWeight: 400, fontSize: '28px', lineHeight: 1 }}>
+        {isOpen ? '−' : '+'}
+      </div>
+    </button>
+    {isOpen && (
+      <div style={{ paddingBottom: '24px', animation: 'fadeIn 0.3s ease' }}>
+        {children}
+      </div>
+    )}
+  </div>
+);
+
 export function ProductTabs({ productId, reviewsCount, hasFaqs, hasDetails = false, descriptionNode, reviewsListNode, faqsNode, detailsNode }: ProductTabsProps) {
-  const [activeTab, setActiveTab] = useState<'details' | 'description' | 'reviews' | 'faq'>(hasDetails ? 'details' : 'description');
+  const [openSection, setOpenSection] = useState<string | null>(hasDetails ? 'details' : 'description');
+
+  const toggleSection = (section: string) => {
+    setOpenSection(openSection === section ? null : section);
+  };
 
   return (
-    <div style={{ marginTop: '64px', background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+    <div style={{ marginTop: '64px' }}>
       
-      {/* Tab Navigation */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', overflowX: 'auto' }}>
-        {hasDetails && (
-          <button 
-            onClick={() => setActiveTab('details')}
-            style={{ padding: '20px 32px', fontSize: '16px', fontWeight: activeTab === 'details' ? 800 : 600, color: activeTab === 'details' ? '#0f172a' : '#64748b', border: 'none', background: activeTab === 'details' ? '#fff' : 'transparent', borderBottom: activeTab === 'details' ? '3px solid #D63062' : '3px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}
-          >
-            Product Details
-          </button>
-        )}
-        <button 
-          onClick={() => setActiveTab('description')}
-          style={{ padding: '20px 32px', fontSize: '16px', fontWeight: activeTab === 'description' ? 800 : 600, color: activeTab === 'description' ? '#0f172a' : '#64748b', border: 'none', background: activeTab === 'description' ? '#fff' : 'transparent', borderBottom: activeTab === 'description' ? '3px solid #D63062' : '3px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}
-        >
-          Description
-        </button>
-        <button 
-          onClick={() => setActiveTab('reviews')}
-          style={{ padding: '20px 32px', fontSize: '16px', fontWeight: activeTab === 'reviews' ? 800 : 600, color: activeTab === 'reviews' ? '#0f172a' : '#64748b', border: 'none', background: activeTab === 'reviews' ? '#fff' : 'transparent', borderBottom: activeTab === 'reviews' ? '3px solid #D63062' : '3px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
-          Reviews
-          <span style={{ background: activeTab === 'reviews' ? '#D63062' : '#e2e8f0', color: activeTab === 'reviews' ? '#fff' : '#64748b', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 800 }}>{reviewsCount}</span>
-        </button>
-        {hasFaqs && (
-          <button 
-            onClick={() => setActiveTab('faq')}
-            style={{ padding: '20px 32px', fontSize: '16px', fontWeight: activeTab === 'faq' ? 800 : 600, color: activeTab === 'faq' ? '#0f172a' : '#64748b', border: 'none', background: activeTab === 'faq' ? '#fff' : 'transparent', borderBottom: activeTab === 'faq' ? '3px solid #D63062' : '3px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}
-          >
-            FAQ
-          </button>
-        )}
-      </div>
-
-      {/* Tab Content */}
-      <div style={{ padding: '40px' }}>
+      {/* Accordion Sections */}
+      <div style={{ borderTop: '1px solid #e2e8f0' }}>
         
-        {/* Details Tab */}
         {hasDetails && (
-          <div style={{ display: activeTab === 'details' ? 'block' : 'none' }}>
+          <AccordionItem 
+            title="Product Details" 
+            isOpen={openSection === 'details'} 
+            onClick={() => toggleSection('details')}
+            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b21b6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>}
+          >
             {detailsNode}
-          </div>
+          </AccordionItem>
         )}
 
-        {/* Description Tab */}
-        <div style={{ display: activeTab === 'description' ? 'block' : 'none' }}>
+        <AccordionItem 
+          title="Description" 
+          isOpen={openSection === 'description'} 
+          onClick={() => toggleSection('description')}
+          icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b21b6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>}
+        >
           {descriptionNode}
-        </div>
+        </AccordionItem>
 
-        {/* Reviews Tab */}
-        <div style={{ display: activeTab === 'reviews' ? 'block' : 'none' }}>
-          {reviewsListNode}
-        </div>
-
-        {/* FAQ Tab */}
         {hasFaqs && (
-          <div style={{ display: activeTab === 'faq' ? 'block' : 'none' }}>
+          <AccordionItem 
+            title="FAQ" 
+            isOpen={openSection === 'faq'} 
+            onClick={() => toggleSection('faq')}
+            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b21b6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>}
+          >
             {faqsNode}
-          </div>
+          </AccordionItem>
         )}
+
       </div>
+
+      {/* Persistent Customer Reviews Section */}
+      <div style={{ marginTop: '64px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
+        <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#0f172a', marginBottom: '24px' }}>Customer reviews</h2>
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+             <span style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>{reviewsCount} Reviews</span>
+          </div>
+          <button 
+            style={{ 
+              background: '#fff', 
+              color: '#5b21b6', 
+              border: '2px solid #5b21b6', 
+              padding: '12px 24px', 
+              borderRadius: '8px', 
+              fontWeight: 700, 
+              cursor: 'pointer', 
+              fontSize: '15px',
+              transition: 'all 0.2s',
+              width: '100%',
+              maxWidth: '300px'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.background = '#f5f3ff'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; }}
+          >
+            Write a review
+          </button>
+        </div>
+        
+        {reviewsListNode}
+      </div>
+
     </div>
   );
 }
