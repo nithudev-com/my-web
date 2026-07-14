@@ -34,6 +34,15 @@ export async function ProductCard({ id, title, slug, image, price, salePrice, ca
 
   const isOutOfStock = stockQuantity <= 0;
 
+  let discountPercentage = 0;
+  if (salePrice && price) {
+    const p = Number(price);
+    const sp = Number(salePrice);
+    if (p > 0 && sp < p) {
+      discountPercentage = Math.round(((p - sp) / p) * 100);
+    }
+  }
+
   return (
     <div className="premium-product-card" style={{ 
       background: '#ffffff', 
@@ -52,11 +61,15 @@ export async function ProductCard({ id, title, slug, image, price, salePrice, ca
         </div>
       )}
 
-      {isOutOfStock && (
+      {isOutOfStock ? (
         <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(239, 68, 68, 0.9)', color: '#fff', fontSize: '11px', fontWeight: 800, padding: '4px 8px', borderRadius: '4px', zIndex: 10 }}>
           OUT OF STOCK
         </div>
-      )}
+      ) : discountPercentage > 0 ? (
+        <div style={{ position: 'absolute', top: '12px', left: '12px', background: '#ffffff', color: '#e01a70', border: '1px solid #e01a70', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '16px', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {discountPercentage}% OFF
+        </div>
+      ) : null}
 
       <a className="premium-card-image-link" href={`/product/${slug}`}>
         {image ? (
