@@ -349,7 +349,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           ) : (
             <div style={{ padding: '32px', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1px solid #f1f5f9', marginBottom: '48px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>No reviews yet</h3>
-              <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Be the first to review this product!</p>
+              <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Reviews are collected exclusively from verified buyers.</p>
             </div>
           )
         }

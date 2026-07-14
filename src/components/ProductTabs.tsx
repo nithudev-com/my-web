@@ -85,29 +85,8 @@ export function ProductTabs({ productId, reviewsCount, hasFaqs, hasDetails = fal
       <div style={{ marginTop: '40px', borderTop: '1px solid #e2e8f0', paddingTop: '32px' }}>
         <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#0f172a', marginBottom: '24px' }}>Customer reviews</h2>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-             <span style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>{reviewsCount} Reviews</span>
-          </div>
-          <button 
-            style={{ 
-              background: '#fff', 
-              color: '#5b21b6', 
-              border: '2px solid #5b21b6', 
-              padding: '12px 24px', 
-              borderRadius: '8px', 
-              fontWeight: 700, 
-              cursor: 'pointer', 
-              fontSize: '15px',
-              transition: 'all 0.2s',
-              width: '100%',
-              maxWidth: '300px'
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.background = '#f5f3ff'; }}
-            onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; }}
-          >
-            Write a review
-          </button>
+        <div style={{ marginBottom: '32px' }}>
+          <span style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>{reviewsCount} Reviews</span>
         </div>
         
         {reviewsListNode}
