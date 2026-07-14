@@ -18,7 +18,7 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return getTopProductSlugs(1000);
+  return getTopProductSlugs(50);
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
