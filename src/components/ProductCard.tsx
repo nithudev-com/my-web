@@ -14,9 +14,10 @@ type ProductCardProps = {
   category?: string | null;
   brand?: string | null;
   variantsCount?: number;
+  stockQuantity?: number;
 };
 
-export async function ProductCard({ id, title, slug, image, price, salePrice, category, brand, variantsCount = 0 }: ProductCardProps) {
+export async function ProductCard({ id, title, slug, image, price, salePrice, category, brand, variantsCount = 0, stockQuantity = 1 }: ProductCardProps) {
   let avgRating = 0;
   let reviewCount = 0;
 
@@ -30,6 +31,8 @@ export async function ProductCard({ id, title, slug, image, price, salePrice, ca
     reviewCount = stats._count.rating;
     avgRating = stats._avg.rating ? Number(stats._avg.rating) : 0;
   }
+
+  const isOutOfStock = stockQuantity <= 0;
 
   return (
     <div className="premium-product-card" style={{ 
@@ -46,6 +49,12 @@ export async function ProductCard({ id, title, slug, image, price, salePrice, ca
       {id && (
         <div className="premium-wishlist-pos">
           <WishlistButton productId={id} mini={true} />
+        </div>
+      )}
+
+      {isOutOfStock && (
+        <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(239, 68, 68, 0.9)', color: '#fff', fontSize: '11px', fontWeight: 800, padding: '4px 8px', borderRadius: '4px', zIndex: 10 }}>
+          OUT OF STOCK
         </div>
       )}
 
@@ -104,7 +113,7 @@ export async function ProductCard({ id, title, slug, image, price, salePrice, ca
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 </a>
               ) : (
-                <AddToCartButton productId={id} outOfStock={false} mini={true} />
+                <AddToCartButton productId={id} outOfStock={isOutOfStock} mini={true} />
               )}
             </div>
           )}

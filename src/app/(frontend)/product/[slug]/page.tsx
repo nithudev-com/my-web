@@ -12,6 +12,7 @@ import { BuyNowButton } from "@/components/BuyNowButton";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductTabs } from "@/components/ProductTabs";
 import { ProductActionBox } from "../components/ProductActionBox";
+import { ProductCard } from "@/components/ProductCard";
 import { prisma } from "@/lib/prisma";
 
 export const revalidate = 3600;
@@ -63,7 +64,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const relatedProducts = product.categoryId ? await prisma.product.findMany({
     where: { categoryId: product.categoryId, id: { not: product.id }, status: 'ACTIVE' },
     take: 4,
-    select: { id: true, title: true, slug: true, mainImage: true, basePrice: true, salePrice: true }
+    select: { 
+      id: true, 
+      title: true, 
+      slug: true, 
+      mainImage: true, 
+      basePrice: true, 
+      salePrice: true,
+      stockQuantity: true,
+      category: { select: { name: true } },
+      brand: { select: { name: true } },
+      _count: { select: { variants: true } }
+    }
   }) : [];
 
   const jsonLd = productJsonLd(product);
@@ -364,21 +376,21 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <div style={{ marginTop: '80px', borderTop: '1px solid #e2e8f0', paddingTop: '80px' }}>
           <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '32px', color: '#0f172a' }}>You May Also Like</h2>
           <div className="related-products-grid">
-            {await Promise.all(relatedProducts.map(async (rp) => (
-              <Link key={rp.id.toString()} href={`/product/${rp.slug}`} style={{ textDecoration: 'none' }}>
-                <div className="related-card">
-                  <div style={{ aspectRatio: '1/1', background: '#f8fafc', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-                    {rp.mainImage && <Image src={rp.mainImage} alt={rp.title} fill style={{ objectFit: 'cover' }} />}
-                  </div>
-                  <div>
-                    <h3 className="related-card-title">{rp.title}</h3>
-                    <div style={{ fontWeight: 900, color: rp.salePrice ? '#D63062' : '#0f172a' }}>
-                      {await formatPrice((rp.salePrice || rp.basePrice).toString())}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            )))}
+            {relatedProducts.map((rp) => (
+              <ProductCard
+                key={rp.id.toString()}
+                id={rp.id.toString()}
+                title={rp.title}
+                slug={rp.slug}
+                image={rp.mainImage}
+                price={rp.basePrice.toString()}
+                salePrice={rp.salePrice?.toString()}
+                category={rp.category?.name}
+                brand={rp.brand?.name}
+                variantsCount={rp._count?.variants || 0}
+                stockQuantity={rp.stockQuantity}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -452,14 +464,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         @media (min-width: 600px) { .cta-text { display: block !important; } }
         
         .related-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
-        .related-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; transition: all 0.2s; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .related-card-title { font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .related-card:hover { border-color: #D63062; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(214,48,98,0.1); }
         
         @media (max-width: 600px) {
           .related-products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-          .related-card { padding: 12px; gap: 8px; border-radius: 12px; }
-          .related-card-title { font-size: 13px; }
         }
 
         .related-blog-card:hover { border-color: #a855f7 !important; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(168, 85, 247, 0.15); }
