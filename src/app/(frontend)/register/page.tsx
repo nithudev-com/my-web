@@ -26,6 +26,8 @@ function RegisterForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpSent, setOtpSent] = useState(false);
   
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -46,18 +48,36 @@ function RegisterForm() {
     }
   }, [password, confirmPassword]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const sendOtp = () => {
+    setLoading(true);
+    // Simulate API call to send OTP
+    setTimeout(() => {
+      setLoading(false);
+      setOtpSent(true);
+      setStep(4);
+    }, 1500);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
     
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
 
+    if (otp.join('').length !== 6) {
+      setError('Please enter the valid 6-digit OTP.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
-    const formData = new FormData(e.currentTarget);
+    // If e is a form event, get formData, else we must construct it from state/DOM
+    const formElement = document.getElementById('registerForm') as HTMLFormElement;
+    const formData = new FormData(formElement);
+    
     const result = await customerRegister(formData);
 
     if (result.success) {
@@ -70,34 +90,57 @@ function RegisterForm() {
     }
   };
 
-  const nextStep = () => setStep(s => Math.min(s + 1, 3));
+  const nextStep = () => setStep(s => Math.min(s + 1, 4));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) value = value[value.length - 1]; // Only 1 char
+    if (!/^\d*$/.test(value)) return; // Only numbers
+    
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Auto-focus next
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <form id="registerForm" onSubmit={(e) => { e.preventDefault(); if (step === 4) handleSubmit(e); }} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
       {/* Progress Indicator */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3, 4].map(i => (
           <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
             <div style={{ 
-              width: '32px', height: '32px', borderRadius: '50%', 
+              width: '28px', height: '28px', borderRadius: '50%', 
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 'bold', fontSize: '14px',
+              fontWeight: 'bold', fontSize: '13px',
               background: step >= i ? 'var(--brand-primary)' : 'var(--border)',
               color: step >= i ? 'white' : 'var(--muted)',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              boxShadow: step === i ? '0 0 0 4px rgba(214, 48, 98, 0.2)' : 'none'
             }}>
               {i}
             </div>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: step >= i ? 'var(--brand-primary)' : 'var(--muted)' }}>
-              {i === 1 ? 'Personal Info' : i === 2 ? 'Security' : 'Verification'}
+            <div style={{ fontSize: '11px', fontWeight: '700', color: step >= i ? 'var(--brand-primary)' : 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {i === 1 ? 'Details' : i === 2 ? 'Security' : i === 3 ? 'Legal' : 'Verify'}
             </div>
           </div>
         ))}
       </div>
-      <div style={{ height: '2px', background: 'var(--border)', marginTop: '-36px', marginBottom: '34px', position: 'relative', zIndex: -1 }}>
-        <div style={{ height: '100%', background: 'var(--brand-primary)', width: (((step - 1) / 2) * 100) + '%', transition: 'all 0.3s ease' }}></div>
+      <div style={{ height: '2px', background: 'var(--border)', marginTop: '-34px', marginBottom: '32px', position: 'relative', zIndex: -1, width: 'calc(100% - 25%)', marginLeft: '12.5%' }}>
+        <div style={{ height: '100%', background: 'var(--brand-primary)', width: (((step - 1) / 3) * 100) + '%', transition: 'all 0.3s ease' }}></div>
       </div>
 
       {/* Step 1: Personal Info */}
@@ -201,7 +244,7 @@ function RegisterForm() {
           </div>
         </div>
 
-        {error && (
+        {error && step === 3 && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px', borderRadius: '8px', color: '#ef4444', fontSize: '14px', marginBottom: '20px' }}>
             {error}
           </div>
@@ -209,8 +252,55 @@ function RegisterForm() {
 
         <div style={{ display: 'flex', gap: '12px' }}>
           <button type="button" onClick={prevStep} className="auth-button" style={{ background: 'var(--muted)', flex: 1 }}>Back</button>
-          <button type="submit" className="auth-button" disabled={loading} style={{ flex: 2 }}>
-            {loading ? 'Creating Account...' : 'Create Account'}
+          <button type="button" onClick={sendOtp} className="auth-button" disabled={loading} style={{ flex: 2 }}>
+            {loading ? 'Sending OTP...' : 'Send OTP Code'}
+          </button>
+        </div>
+      </div>
+
+      {/* Step 4: OTP Verification */}
+      <div style={{ display: step === 4 ? 'block' : 'none' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fdf2f8', color: '#D63062', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          </div>
+          <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--brand-black)', marginBottom: '8px' }}>Verify Your Email</h3>
+          <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: 1.5 }}>
+            We've sent a secure 6-digit One Time Password (OTP) to your email address.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '32px' }}>
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              id={`otp-${index}`}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleOtpChange(index, e.target.value)}
+              onKeyDown={(e) => handleOtpKeyDown(index, e)}
+              style={{
+                width: '45px', height: '55px', fontSize: '24px', fontWeight: '800', textAlign: 'center',
+                border: digit ? '2px solid var(--brand-primary)' : '2px solid var(--border)',
+                borderRadius: '12px', background: '#fff', color: 'var(--brand-black)',
+                transition: 'all 0.2s ease', outline: 'none', boxShadow: digit ? '0 4px 12px rgba(214, 48, 98, 0.1)' : 'none'
+              }}
+            />
+          ))}
+        </div>
+
+        {error && step === 4 && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px', borderRadius: '8px', color: '#ef4444', fontSize: '14px', marginBottom: '20px', textAlign: 'center', fontWeight: '600' }}>
+            {error}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button type="button" onClick={prevStep} className="auth-button" style={{ background: '#fff', color: 'var(--brand-black)', border: '2px solid var(--border)', flex: 1 }}>Edit Info</button>
+          <button type="button" onClick={handleSubmit} className="auth-button" disabled={loading || otp.join('').length !== 6} style={{ flex: 2, background: otp.join('').length === 6 ? 'var(--brand-primary)' : 'var(--muted)' }}>
+            {loading ? 'Verifying...' : 'Verify & Create Account'}
           </button>
         </div>
       </div>
