@@ -1,10 +1,11 @@
 import type { Product, Category, Brand } from "@prisma/client";
 
 export function siteUrl(path = "") {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "");
+  let base = process.env.NEXT_PUBLIC_SITE_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "");
   
-  if (!base && process.env.NODE_ENV !== "development") {
-    throw new Error("Missing NEXT_PUBLIC_SITE_URL configuration for production");
+  if (!base) {
+    console.warn("Warning: Missing NEXT_PUBLIC_SITE_URL configuration. Falling back to https://sextoyslovers.com");
+    base = "https://sextoyslovers.com";
   }
 
   // Ensure path starts with a slash if provided
