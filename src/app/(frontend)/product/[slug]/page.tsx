@@ -208,10 +208,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
           <ProductActionBox product={product} />
 
-          {/* Meta Data is now professionally arranged inside ProductActionBox */}
           {/* Social Share */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
-            <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginRight: '8px' }}>Share:</span>
+            <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', marginRight: '8px' }}>Share With Your Partner:</span>
             <a href={`https://wa.me/?text=${encodeURIComponent(currentUrl)}`} target="_blank" rel="noreferrer" style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </a>
