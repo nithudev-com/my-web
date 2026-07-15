@@ -11,10 +11,7 @@ const nextConfig = {
     ]
   },
   typedRoutes: false,
-  productionBrowserSourceMaps: true,
-  experimental: {
-    optimizeCss: true
-  }
+  productionBrowserSourceMaps: true
 };
 
 export default nextConfig;
