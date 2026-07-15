@@ -11,11 +11,16 @@ export function SlideOutCart() {
   const cart = useCartContext();
   const [validatedCart, setValidatedCart] = useState<RevalidatedCart | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [couponInput, setCouponInput] = useState(cart.couponCode || '');
+
+  useEffect(() => {
+    setCouponInput(cart.couponCode || '');
+  }, [cart.couponCode]);
 
   useEffect(() => {
     if (cart.isCartOpen && cart.items.length > 0) {
       setIsLoading(true);
-      revalidateCartTotals(cart.items)
+      revalidateCartTotals(cart.items, undefined, cart.couponCode || undefined)
         .then((result) => {
           setValidatedCart(result);
           setIsLoading(false);
@@ -34,7 +39,7 @@ export function SlideOutCart() {
           setIsLoading(false);
         });
     }
-  }, [cart.isCartOpen, cart.items]);
+  }, [cart.isCartOpen, cart.items, cart.couponCode]);
 
   if (!cart.isLoaded) return null;
 
@@ -74,32 +79,38 @@ export function SlideOutCart() {
                 Continue Shopping
               </button>
             </div>
-          ) : isLoading && !validatedCart ? (
-            <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>Loading items...</div>
           ) : (
-            validatedCart?.items.map((item, idx) => (
-              <div key={`${item.productId}-${item.variantId || idx}`} style={{ display: 'flex', gap: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
+            cart.items.map((cartItem, idx) => {
+              const validatedItem = validatedCart?.items.find(v => v.productId === cartItem.productId && v.variantId === cartItem.variantId);
+              const title = validatedItem?.title || cartItem.title || 'Loading...';
+              const price = validatedItem?.unitPrice || cartItem.price || 0;
+              const imageUrl = validatedItem?.imageUrl || cartItem.imageUrl;
+              const variantTitle = validatedItem?.variantTitle;
+              const totalPrice = price * cartItem.quantity;
+
+              return (
+              <div key={`${cartItem.productId}-${cartItem.variantId || idx}`} style={{ display: 'flex', gap: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
                 <div style={{ width: '80px', height: '80px', position: 'relative', background: '#f8fafc', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
-                  {item.imageUrl ? (
-                    <Image src={item.imageUrl} alt={item.title} fill style={{ objectFit: 'cover' }} />
+                  {imageUrl ? (
+                    <Image src={imageUrl} alt={title} fill style={{ objectFit: 'cover' }} />
                   ) : (
                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Img</div>
                   )}
                 </div>
                 <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontWeight: 600, fontSize: '14px', lineHeight: 1.3 }}>{item.title}</div>
-                  {item.variantTitle && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>{item.variantTitle}</div>}
+                  <div style={{ fontWeight: 600, fontSize: '14px', lineHeight: 1.3 }}>{title}</div>
+                  {variantTitle && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>{variantTitle}</div>}
                   <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f1f5f9', borderRadius: '4px', padding: '2px 6px' }}>
-                      <button aria-label="Decrease quantity" onClick={() => cart.updateQuantity(item.productId, item.quantity - 1, item.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>-</button>
-                      <span style={{ fontSize: '14px', fontWeight: 600 }}>{item.quantity}</span>
-                      <button aria-label="Increase quantity" onClick={() => cart.updateQuantity(item.productId, item.quantity + 1, item.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>+</button>
+                      <button aria-label="Decrease quantity" onClick={() => cart.updateQuantity(cartItem.productId, cartItem.quantity - 1, cartItem.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>-</button>
+                      <span style={{ fontSize: '14px', fontWeight: 600 }}>{cartItem.quantity}</span>
+                      <button aria-label="Increase quantity" onClick={() => cart.updateQuantity(cartItem.productId, cartItem.quantity + 1, cartItem.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>+</button>
                     </div>
-                    <div style={{ fontWeight: 700 }}>${item.totalPrice.toFixed(2)}</div>
+                    <div style={{ fontWeight: 700 }}>${totalPrice.toFixed(2)}</div>
                   </div>
                 </div>
                 <button 
-                  onClick={() => cart.removeItem(item.productId, item.variantId)} 
+                  onClick={() => cart.removeItem(cartItem.productId, cartItem.variantId)} 
                   style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '4px', alignSelf: 'flex-start' }}
                   title="Remove item"
                   aria-label="Remove item"
@@ -107,17 +118,55 @@ export function SlideOutCart() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
               </div>
-            ))
+              );
+            })
           )}
         </div>
 
         {validatedCart && validatedCart.items.length > 0 && (
           <div className="cart-drawer-footer">
+            {cart.couponCode ? (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ecfdf5', color: '#059669', padding: '8px 12px', borderRadius: '8px', marginBottom: '16px', fontSize: '13px', fontWeight: 600 }}>
+                {validatedCart.couponMessage || `Code applied: ${cart.couponCode}`}
+                <button onClick={() => cart.setCouponCode(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 700, fontSize: '18px', padding: '0 4px' }}>×</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                <input 
+                  type="text" 
+                  value={couponInput} 
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="Discount code" 
+                  style={{ flex: 1, padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                />
+                <button 
+                  onClick={() => cart.setCouponCode(couponInput.trim())}
+                  disabled={!couponInput.trim() || isLoading}
+                  style={{ background: '#1e293b', color: '#fff', border: 'none', borderRadius: '8px', padding: '0 16px', fontWeight: 600, cursor: 'pointer', opacity: (!couponInput.trim() || isLoading) ? 0.5 : 1 }}
+                >
+                  Apply
+                </button>
+              </div>
+            )}
+            
             <div className="cart-drawer-totals">
               <span>Subtotal</span>
               <span>${validatedCart?.totals.subtotal.toFixed(2) || '0.00'}</span>
             </div>
-            <Link prefetch={true} href="/checkout" className="cart-drawer-checkout" onClick={cart.closeCart}>
+            
+            {validatedCart.totals.discount > 0 && (
+              <div className="cart-drawer-totals" style={{ color: '#059669' }}>
+                <span>Discount</span>
+                <span>-${validatedCart.totals.discount.toFixed(2)}</span>
+              </div>
+            )}
+            
+            <div className="cart-drawer-totals" style={{ fontWeight: 800, fontSize: '18px', borderTop: '1px solid #e2e8f0', paddingTop: '12px', marginTop: '12px' }}>
+              <span>Total</span>
+              <span>${(validatedCart.totals.subtotal - validatedCart.totals.discount).toFixed(2)}</span>
+            </div>
+            
+            <Link prefetch={true} href="/checkout" className="cart-drawer-checkout" onClick={cart.closeCart} style={{ marginTop: '16px' }}>
               Secure Checkout
             </Link>
           </div>

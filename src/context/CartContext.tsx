@@ -6,6 +6,9 @@ export type CartItemInput = {
   productId: string;
   variantId?: string;
   quantity: number;
+  title?: string;
+  price?: number;
+  imageUrl?: string;
 };
 
 type CartContextType = {
@@ -14,11 +17,13 @@ type CartContextType = {
   isCartOpen: boolean;
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   removeItem: (productId: string, variantId?: string) => void;
-  addItem: (productId: string, quantity: number, variantId?: string) => void;
+  addItem: (productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string) => void;
   clearCart: () => void;
   syncItems: (items: CartItemInput[]) => void;
   openCart: () => void;
   closeCart: () => void;
+  couponCode: string | null;
+  setCouponCode: (code: string | null) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,6 +32,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItemInput[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [couponCode, setCouponCodeState] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -34,11 +40,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (stored) {
         setItems(JSON.parse(stored));
       }
+      const storedCoupon = localStorage.getItem('speed_cart_coupon');
+      if (storedCoupon) {
+        setCouponCodeState(storedCoupon);
+      }
     } catch (e) {
       console.error("Failed to load cart", e);
     }
     setIsLoaded(true);
   }, []);
+
+  const setCouponCode = (code: string | null) => {
+    setCouponCodeState(code);
+    if (code) {
+      localStorage.setItem('speed_cart_coupon', code);
+    } else {
+      localStorage.removeItem('speed_cart_coupon');
+    }
+  };
 
   const saveCart = (newItems: CartItemInput[]) => {
     setItems(newItems);
@@ -61,14 +80,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     saveCart(newItems);
   };
 
-  const addItem = (productId: string, quantity: number, variantId?: string) => {
+  const addItem = (productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string) => {
     const existingIndex = items.findIndex(item => item.productId === productId && item.variantId === variantId);
     if (existingIndex >= 0) {
       const newItems = [...items];
       newItems[existingIndex].quantity += quantity;
+      // Update with latest metadata if provided
+      if (title) newItems[existingIndex].title = title;
+      if (price !== undefined) newItems[existingIndex].price = price;
+      if (imageUrl) newItems[existingIndex].imageUrl = imageUrl;
       saveCart(newItems);
     } else {
-      saveCart([...items, { productId, variantId, quantity }]);
+      saveCart([...items, { productId, variantId, quantity, title, price, imageUrl }]);
     }
     setIsCartOpen(true); // Automatically open the slide-out cart when adding
   };
@@ -82,7 +105,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <CartContext.Provider value={{
-      items, isLoaded, isCartOpen, updateQuantity, removeItem, addItem, clearCart, syncItems: saveCart, openCart, closeCart
+      items, isLoaded, isCartOpen, updateQuantity, removeItem, addItem, clearCart, syncItems: saveCart, openCart, closeCart, couponCode, setCouponCode
     }}>
       {children}
     </CartContext.Provider>
