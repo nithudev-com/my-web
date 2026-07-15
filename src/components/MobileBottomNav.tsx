@@ -101,7 +101,7 @@ export function MobileBottomNav() {
             justify-content: center;
             padding: 12px 8px;
             text-decoration: none;
-            color: #94a3b8; /* Inactive color */
+            color: #64748b; /* Inactive color */
             position: relative;
             background: transparent;
             border: none;
