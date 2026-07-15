@@ -28,6 +28,7 @@ export function CategoryGrid({ categories }: { categories: any[] }) {
               <Link 
                 key={category.id} 
                 href={`/category/${category.slug}`} 
+                prefetch={true}
                 className="category-showcase-card"
               >
                 <span className="category-showcase-name">{category.name}</span>

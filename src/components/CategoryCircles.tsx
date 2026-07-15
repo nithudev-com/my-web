@@ -26,7 +26,7 @@ export function CategoryCircles({ items }: { items: CategoryCircleItem[] }) {
                 item.name.toLowerCase().includes('quiz');
 
               return (
-                <Link key={item.id} href={item.url} className="category-circle-card">
+                <Link key={item.id} href={item.url} prefetch={true} className="category-circle-card">
                   <div className={`category-circle-img-wrapper ${isDarkBadge ? 'dark-badge' : 'light-badge'}`} style={{ position: 'relative' }}>
                     <Image src={item.image} alt="" fill sizes="96px" style={{ objectFit: isDarkBadge ? 'cover' : 'contain' }} className="category-circle-img" />
                   </div>

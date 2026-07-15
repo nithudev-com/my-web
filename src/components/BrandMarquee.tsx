@@ -19,6 +19,7 @@ export function BrandMarquee({ brands }: { brands: any[] }) {
             <Link 
               key={`${brand.id}-${index}`} 
               href={`/brand/${brand.slug}`} 
+              prefetch={true}
               className="brand-marquee-item"
             >
               <div className="brand-logo-wrapper" style={{ position: 'relative' }}>
