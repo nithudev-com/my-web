@@ -67,6 +67,7 @@ export default function AdminLayout({
             <Link href="/admin/settings/shipping" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Shipping Zones</Link>
             <Link href="/admin/settings/taxes" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Taxes</Link>
             <Link href="/admin/settings/payment-gateways" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Payment Gateways</Link>
+            <Link href="/admin/sitemaps" style={{ padding: '10px 14px', borderRadius: '8px', color: '#a5f3fc', fontWeight: '700' }}>🗺 Sitemaps & SEO</Link>
           </nav>
           
           <div className="muted" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', fontWeight: '700' }}>Storefront</div>
