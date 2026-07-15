@@ -11,7 +11,7 @@ export function Footer({ settings }: { settings: any }) {
         <div className="premium-footer-grid">
           {/* Column 1: Brand & Socials */}
           <div>
-            <Link href="/" className="footer-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+            <Link prefetch={true} href="/" className="footer-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
               <Image src="/logo.jpg" alt="" width={70} height={70} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--brand-primary, #D63062)' }} />
               <span style={{ fontSize: '20px', fontWeight: '900', color: '#fff' }}>{settings.storeName || "SexToys Lovers"}</span>
             </Link>
@@ -61,11 +61,11 @@ export function Footer({ settings }: { settings: any }) {
           <div>
             <h4 className="footer-heading">Shop Categories</h4>
             <ul className="footer-links-list">
-              <li><Link href="/category/vibrators">Vibrators</Link></li>
-              <li><Link href="/category/dongs-and-dildos">Dildos & Dongs</Link></li>
-              <li><Link href="/category/anal-toys">Anal Toys</Link></li>
-              <li><Link href="/category/lubes-and-lotions">Lubes & Lotions</Link></li>
-              <li><Link href="/category/bdsm">BDSM & Bondage</Link></li>
+              <li><Link prefetch={true} href="/category/vibrators">Vibrators</Link></li>
+              <li><Link prefetch={true} href="/category/dongs-and-dildos">Dildos & Dongs</Link></li>
+              <li><Link prefetch={true} href="/category/anal-toys">Anal Toys</Link></li>
+              <li><Link prefetch={true} href="/category/lubes-and-lotions">Lubes & Lotions</Link></li>
+              <li><Link prefetch={true} href="/category/bdsm">BDSM & Bondage</Link></li>
             </ul>
           </div>
 
@@ -73,10 +73,10 @@ export function Footer({ settings }: { settings: any }) {
           <div>
             <h4 className="footer-heading">Support</h4>
             <ul className="footer-links-list">
-              <li><Link href="/contact">Help Center</Link></li>
-              <li><Link href="/account/orders">Track Order</Link></li>
-              <li><Link href="/returns">Returns Policy</Link></li>
-              <li><Link href="/contact">Contact Us</Link></li>
+              <li><Link prefetch={true} href="/contact">Help Center</Link></li>
+              <li><Link prefetch={true} href="/account/orders">Track Order</Link></li>
+              <li><Link prefetch={true} href="/returns">Returns Policy</Link></li>
+              <li><Link prefetch={true} href="/contact">Contact Us</Link></li>
             </ul>
           </div>
 

@@ -23,9 +23,9 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
         <div className="top-announcement-bar">
           <div>🔥 Free standard shipping on all orders over $100!</div>
           <div className="top-bar-links">
-            <Link href="/contact">Store Locator</Link>
-            <Link href="/account/orders">Track Order</Link>
-            <Link href="/contact">Help Center</Link>
+            <Link prefetch={true} href="/contact">Store Locator</Link>
+            <Link prefetch={true} href="/account/orders">Track Order</Link>
+            <Link prefetch={true} href="/contact">Help Center</Link>
             <span style={{ marginLeft: '16px', color: '#cbd5e1' }}>|</span>
             <span style={{ marginLeft: '16px' }}>ENG / USD</span>
           </div>
@@ -33,21 +33,21 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
 
         {/* 2. Main Hub */}
         <div className="main-header-hub">
-          <Link href="/" className="mega-logo" style={{ display: 'flex', alignItems: 'center' }}>
+          <Link prefetch={true} href="/" className="mega-logo" style={{ display: 'flex', alignItems: 'center' }}>
             <img src="/logo-new.png" alt={settings.storeName || "SexToys Lovers"} style={{ maxHeight: '44px', width: 'auto' }} />
           </Link>
           
           <AutocompleteSearch isMobile={false} categories={categories} />
 
           <div className="header-action-group">
-            <Link href="/account" className="header-action-item">
+            <Link prefetch={true} href="/account" className="header-action-item">
               <div className="header-action-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               </div>
               <span>Account</span>
             </Link>
             
-            <Link href="/account/wishlist" className="header-action-item">
+            <Link prefetch={true} href="/account/wishlist" className="header-action-item">
               <div className="header-action-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 <span className="header-badge">0</span>
@@ -72,12 +72,12 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
             All Departments
           </button>
           <div className="bottom-nav-links">
-            <Link href="/deals">Today's Deals</Link>
+            <Link prefetch={true} href="/deals">Today's Deals</Link>
 
-            <Link href="/new-releases">New Releases</Link>
-            <Link href="/brand">Brands</Link>
-            <Link href="/category">Categories</Link>
-            <Link href="/contact">Customer Service</Link>
+            <Link prefetch={true} href="/new-releases">New Releases</Link>
+            <Link prefetch={true} href="/brand">Brands</Link>
+            <Link prefetch={true} href="/category">Categories</Link>
+            <Link prefetch={true} href="/contact">Customer Service</Link>
           </div>
           <MegaMenu 
             categories={categories} 
@@ -94,7 +94,7 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
           
-          <Link href="/" className="mobile-logo" style={{ display: 'flex', alignItems: 'center' }}>
+          <Link prefetch={true} href="/" className="mobile-logo" style={{ display: 'flex', alignItems: 'center' }}>
             <img src="/logo-new.png" alt={settings.storeName || "SexToys Lovers"} style={{ maxHeight: '36px', width: 'auto' }} />
           </Link>
 
@@ -123,7 +123,7 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
             </div>
             <div>
               <div style={{ fontSize: '16px', fontWeight: '700' }}>Hello, Guest</div>
-              <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '13px', color: '#D63062', textDecoration: 'none' }}>Sign In</Link>
+              <Link prefetch={true} href="/login" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '13px', color: '#D63062', textDecoration: 'none' }}>Sign In</Link>
             </div>
           </div>
           <button aria-label="Close Mobile Menu" className="mobile-drawer-close" onClick={() => setIsMobileMenuOpen(false)}>
@@ -141,7 +141,7 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
               return (
                 <div key={cat.slug} style={{ display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Link 
+                    <Link prefetch={true} 
                       href={`/category/${cat.slug}`} 
                       onClick={() => setIsMobileMenuOpen(false)} 
                       className="mobile-drawer-link"
@@ -169,7 +169,7 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
                   {hasChildren && isExpanded && (
                     <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', borderLeft: '2px solid #f1f5f9', marginLeft: '8px', marginTop: '4px', marginBottom: '8px' }}>
                       {cat.children.map((child: any) => (
-                        <Link 
+                        <Link prefetch={true} 
                           key={child.slug}
                           href={`/category/${child.slug}`}
                           onClick={() => setIsMobileMenuOpen(false)}
@@ -189,15 +189,15 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
         <div className="mobile-drawer-section">
           <h3 className="mobile-drawer-title">My Account</h3>
           <div className="mobile-drawer-links">
-            <Link href="/account/orders" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Orders</Link>
-            <Link href="/account/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Wishlist</Link>
-            <Link href="/account/profile" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Account Settings</Link>
+            <Link prefetch={true} href="/account/orders" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Orders</Link>
+            <Link prefetch={true} href="/account/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Wishlist</Link>
+            <Link prefetch={true} href="/account/profile" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Account Settings</Link>
           </div>
         </div>
 
         <div className="mobile-drawer-section" style={{ borderBottom: 'none' }}>
           <div className="mobile-drawer-links">
-            <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Customer Service</Link>
+            <Link prefetch={true} href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Customer Service</Link>
           </div>
         </div>
       </div>

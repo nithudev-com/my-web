@@ -117,7 +117,7 @@ export function SlideOutCart() {
               <span>Subtotal</span>
               <span>${validatedCart?.totals.subtotal.toFixed(2) || '0.00'}</span>
             </div>
-            <Link href="/checkout" className="cart-drawer-checkout" onClick={cart.closeCart}>
+            <Link prefetch={true} href="/checkout" className="cart-drawer-checkout" onClick={cart.closeCart}>
               Secure Checkout
             </Link>
           </div>

@@ -350,7 +350,7 @@ export function MegaMenu({ categories, isOpen, onClose }: MegaMenuProps) {
               className={`mega-menu-sidebar-item ${activeCategory === cat.id ? 'active' : ''}`}
               onMouseEnter={() => setActiveCategory(cat.id)}
             >
-              <Link href={`/category/${cat.slug}`} onClick={onClose}>
+              <Link prefetch={true} href={`/category/${cat.slug}`} onClick={onClose}>
                 {cat.name}
               </Link>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -368,7 +368,7 @@ export function MegaMenu({ categories, isOpen, onClose }: MegaMenuProps) {
                   className="mega-menu-subcat-group"
                   style={{ animationDelay: `${index * 0.015}s` }}
                 >
-                  <Link href={`/category/${subCat.slug}`} className="mega-menu-subcat-card" onClick={onClose}>
+                  <Link prefetch={true} href={`/category/${subCat.slug}`} className="mega-menu-subcat-card" onClick={onClose}>
                     <div className="mega-menu-subcat-img-wrapper">
                       {subCat.image ? (
                         <img src={subCat.image} alt={subCat.name} className="mega-menu-subcat-img" />
@@ -381,7 +381,7 @@ export function MegaMenu({ categories, isOpen, onClose }: MegaMenuProps) {
                   {subCat.children && subCat.children.length > 0 && (
                     <div className="mega-menu-child-links">
                       {subCat.children.map((child) => (
-                        <Link key={child.id} href={`/category/${child.slug}`} className="mega-menu-child-link" onClick={onClose}>
+                        <Link prefetch={true} key={child.id} href={`/category/${child.slug}`} className="mega-menu-child-link" onClick={onClose}>
                           {child.name}
                         </Link>
                       ))}
@@ -403,7 +403,7 @@ export function MegaMenu({ categories, isOpen, onClose }: MegaMenuProps) {
                 <div className="mega-menu-empty-info">
                   <h3>{activeCatData?.name}</h3>
                   <p>Explore our complete range of products in this collection.</p>
-                  <Link href={`/category/${activeCatData?.slug}`} className="mega-menu-shop-all" onClick={onClose} style={{ marginTop: 0 }}>
+                  <Link prefetch={true} href={`/category/${activeCatData?.slug}`} className="mega-menu-shop-all" onClick={onClose} style={{ marginTop: 0 }}>
                     Shop All {activeCatData?.name}
                   </Link>
                 </div>

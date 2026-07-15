@@ -161,7 +161,7 @@ export function MobileBottomNav() {
 
           if (item.href) {
             return (
-              <Link key={item.name} href={item.href} className={`mobile-nav-item ${isActive ? 'active' : ''}`}>
+              <Link prefetch={true} key={item.name} href={item.href} className={`mobile-nav-item ${isActive ? 'active' : ''}`}>
                 {content}
               </Link>
             );

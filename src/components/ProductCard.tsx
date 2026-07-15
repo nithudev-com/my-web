@@ -151,9 +151,9 @@ export async function ProductCard({
         <div className="premium-card-price-row">
           <div>
             <span className="premium-card-price">
-              {await formatPrice(salePrice || price)}
+              {await formatPrice(discountPercentage > 0 ? salePrice : price)}
             </span>
-            {salePrice && (
+            {discountPercentage > 0 && (
               <span className="premium-card-old-price">
                 {await formatPrice(price)}
               </span>

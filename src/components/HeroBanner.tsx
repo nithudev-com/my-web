@@ -273,7 +273,7 @@ export function HeroBanner() {
               New Toys Added Regularly
             </div>
             
-            <Link href="/deals" className="btn-sale-primary">
+            <Link prefetch={true} href="/deals" className="btn-sale-primary">
               Shop The Sale <span style={{fontSize:'26px', lineHeight:0}}>›</span>
             </Link>
           </div>
