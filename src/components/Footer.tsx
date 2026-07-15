@@ -11,7 +11,7 @@ export function Footer({ settings }: { settings: any }) {
           {/* Column 1: Brand & Socials */}
           <div>
             <Link href="/" className="footer-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-              <img src="/logo.jpg" alt={settings.storeName || "SexToys Lovers"} style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--brand-primary, #D63062)' }} />
+              <img src="/logo.jpg" alt="" style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--brand-primary, #D63062)' }} />
               <span style={{ fontSize: '20px', fontWeight: '900', color: '#fff' }}>{settings.storeName || "SexToys Lovers"}</span>
             </Link>
             <p className="footer-desc">

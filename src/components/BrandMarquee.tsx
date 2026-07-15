@@ -22,7 +22,7 @@ export function BrandMarquee({ brands }: { brands: any[] }) {
             >
               <div className="brand-logo-wrapper">
                 {brand.logo ? (
-                  <img src={brand.logo} alt={brand.name} className="brand-logo-img" />
+                  <img src={brand.logo} alt="" className="brand-logo-img" />
                 ) : (
                   <div className="brand-logo-placeholder">{brand.name.charAt(0)}</div>
                 )}

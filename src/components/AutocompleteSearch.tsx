@@ -115,6 +115,7 @@ export function AutocompleteSearch({ isMobile, categories = [] }: { isMobile: bo
         style={{ borderTopLeftRadius: '8px', borderBottomLeftRadius: '8px', maxWidth: '160px', textOverflow: 'ellipsis' }}
         value={selectedCategory}
         onChange={(e) => setSelectedCategory(e.target.value)}
+        aria-label="Search Category"
       >
         <option value="">All</option>
         {categories.map((cat: any) => (
