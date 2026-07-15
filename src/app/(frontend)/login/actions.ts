@@ -5,6 +5,39 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { queueEmail } from '@/lib/email/queue';
 import { EmailChannel } from '@prisma/client';
+import { emailProvider } from '@/lib/email/provider';
+
+export async function sendRegistrationOtp(email: string, firstName: string) {
+  try {
+    const existingCustomer = await prisma.customer.findUnique({ where: { email: email.toLowerCase() } });
+    if (existingCustomer) return { success: false, error: 'An account with this email already exists' };
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit code
+    const salt = await bcrypt.genSalt(10);
+    const hashedOtp = await bcrypt.hash(otp, salt);
+    
+    const cookieStore = await cookies();
+    cookieStore.set('reg_otp', hashedOtp, { maxAge: 600, httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; text-align: center; max-width: 500px; margin: 0 auto; padding: 20px;">
+        <h2>Verify Your Email</h2>
+        <p>Hi ${firstName},</p>
+        <p>Thank you for registering at SexToys Lovers. Please use the following 4-digit code to verify your email address:</p>
+        <div style="font-size: 32px; font-weight: bold; color: #D63062; margin: 20px 0; padding: 15px; background: #FFF4F7; border-radius: 8px; letter-spacing: 4px;">
+          ${otp}
+        </div>
+        <p style="color: #64748b; font-size: 13px;">This code will expire in 10 minutes.</p>
+      </div>
+    `;
+
+    await emailProvider.sendRawEmail(email, "Your Verification Code - SexToys Lovers", html);
+    return { success: true };
+  } catch (err) {
+    console.error(err);
+    return { success: false, error: 'Failed to send OTP.' };
+  }
+}
 
 export async function customerLogin(formData: FormData) {
   const email = formData.get('email') as string;
@@ -60,13 +93,26 @@ export async function customerRegister(formData: FormData) {
   const acceptTerms = formData.get('acceptTerms') === 'on';
   const marketingConsent = formData.get('marketingConsent') === 'on';
   const ageConfirmed = formData.get('ageConfirmed') === 'on';
+  const submittedOtp = formData.get('otp') as string;
 
-  if (!email || !password || !firstName) {
-    return { success: false, error: 'First name, email, and password are required' };
+  if (!email || !password || !firstName || !submittedOtp) {
+    return { success: false, error: 'First name, email, password, and OTP are required' };
   }
 
   if (password !== confirmPassword) {
     return { success: false, error: 'Passwords do not match' };
+  }
+
+  const cookieStore = await cookies();
+  const hashedOtp = cookieStore.get('reg_otp')?.value;
+
+  if (!hashedOtp) {
+    return { success: false, error: 'OTP expired or invalid. Please request a new one.' };
+  }
+
+  const isValidOtp = await bcrypt.compare(submittedOtp, hashedOtp);
+  if (!isValidOtp) {
+    return { success: false, error: 'Incorrect OTP code.' };
   }
 
   if (!acceptTerms) {

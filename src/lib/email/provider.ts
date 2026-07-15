@@ -65,6 +65,26 @@ export class SMTPProvider implements EmailProvider {
       return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   }
+
+  async sendRawEmail(recipient: string, subject: string, html: string): Promise<ProviderResponse> {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn("SMTP credentials missing, simulating raw email send.");
+      return { success: true, messageId: `sim-raw-${Date.now()}` };
+    }
+    
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.fromAddress,
+        to: recipient,
+        subject: subject,
+        html: html,
+      });
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error("SMTP Raw Send Error:", error);
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
+  }
 }
 
 export const emailProvider = new SMTPProvider();

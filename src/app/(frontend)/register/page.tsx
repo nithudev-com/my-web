@@ -2,7 +2,7 @@
 
 import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { customerRegister } from '../login/actions';
+import { customerRegister, sendRegistrationOtp } from '../login/actions';
 import Link from 'next/link';
 
 // Simple password strength calculation
@@ -26,7 +26,7 @@ function RegisterForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '']);
   const [otpSent, setOtpSent] = useState(false);
   
   const [password, setPassword] = useState('');
@@ -48,14 +48,29 @@ function RegisterForm() {
     }
   }, [password, confirmPassword]);
 
-  const sendOtp = () => {
+  const sendOtp = async () => {
     setLoading(true);
-    // Simulate API call to send OTP
-    setTimeout(() => {
+    setError('');
+    const formElement = document.getElementById('registerForm') as HTMLFormElement;
+    const formData = new FormData(formElement);
+    const email = formData.get('email') as string;
+    const firstName = formData.get('firstName') as string;
+    
+    if (!email || !firstName) {
+      setError('First name and email are required to send OTP.');
       setLoading(false);
+      return;
+    }
+
+    const res = await sendRegistrationOtp(email, firstName);
+    setLoading(false);
+    
+    if (res.success) {
       setOtpSent(true);
       setStep(4);
-    }, 1500);
+    } else {
+      setError(res.error || 'Failed to send OTP.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
@@ -66,8 +81,8 @@ function RegisterForm() {
       return;
     }
 
-    if (otp.join('').length !== 6) {
-      setError('Please enter the valid 6-digit OTP.');
+    if (otp.join('').length !== 4) {
+      setError('Please enter the valid 4-digit OTP.');
       return;
     }
 
@@ -77,6 +92,7 @@ function RegisterForm() {
     // If e is a form event, get formData, else we must construct it from state/DOM
     const formElement = document.getElementById('registerForm') as HTMLFormElement;
     const formData = new FormData(formElement);
+    formData.append('otp', otp.join(''));
     
     const result = await customerRegister(formData);
 
@@ -102,7 +118,7 @@ function RegisterForm() {
     setOtp(newOtp);
 
     // Auto-focus next
-    if (value && index < 5) {
+    if (value && index < 3) {
       const nextInput = document.getElementById(`otp-${index + 1}`);
       if (nextInput) nextInput.focus();
     }
@@ -266,7 +282,7 @@ function RegisterForm() {
           </div>
           <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--brand-black)', marginBottom: '8px' }}>Verify Your Email</h3>
           <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: 1.5 }}>
-            We've sent a secure 6-digit One Time Password (OTP) to your email address.
+            We've sent a secure 4-digit One Time Password (OTP) to your email address.
           </p>
         </div>
 
@@ -299,7 +315,7 @@ function RegisterForm() {
 
         <div style={{ display: 'flex', gap: '12px' }}>
           <button type="button" onClick={prevStep} className="auth-button" style={{ background: '#fff', color: 'var(--brand-black)', border: '2px solid var(--border)', flex: 1 }}>Edit Info</button>
-          <button type="button" onClick={handleSubmit} className="auth-button" disabled={loading || otp.join('').length !== 6} style={{ flex: 2, background: otp.join('').length === 6 ? 'var(--brand-primary)' : 'var(--muted)' }}>
+          <button type="button" onClick={handleSubmit} className="auth-button" disabled={loading || otp.join('').length !== 4} style={{ flex: 2, background: otp.join('').length === 4 ? 'var(--brand-primary)' : 'var(--muted)' }}>
             {loading ? 'Verifying...' : 'Verify & Create Account'}
           </button>
         </div>
