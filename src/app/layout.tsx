@@ -21,10 +21,11 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "SexToys Lovers",
+    default: "Best Canada Sex Toys Online Store | SexToys Lovers",
     template: "%s | SexToys Lovers"
   },
-  description: "Next.js ecommerce starter optimized for ISR, speed, SEO, PostgreSQL, Redis, and product imports."
+  description: "Discover the best Canada sex toys online store at SexToys Lovers. Shop a premium selection of adult toys, vibrators, and intimate accessories with discreet, fast shipping across Canada.",
+  keywords: ["canada sex toys", "best adult toys online", "vibrators canada", "adult store canada", "intimate accessories"]
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
