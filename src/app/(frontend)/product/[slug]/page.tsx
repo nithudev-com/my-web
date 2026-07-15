@@ -126,6 +126,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   ];
   const breadcrumbSchema = breadcrumbJsonLd(breadcrumbItems);
 
+  // Combine schemas into a single graph for maximum compatibility with all testing tools
+  const combinedSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      productSchema,
+      breadcrumbSchema,
+      ...(faqSchema ? [faqSchema] : [])
+    ]
+  };
+
   // Safe parsing for other JSON fields (features, details, etc.)
   const safeParseJSON = (data: any, fallback: any = []) => {
     if (Array.isArray(data)) return data;
@@ -191,9 +201,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         @keyframes slideUp { to { transform: translateY(0); } }
       `}} />
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(combinedSchema) }} />
 
       <ViewTracker productId={product.id.toString()} />
 
