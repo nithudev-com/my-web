@@ -47,7 +47,7 @@ export function SlideOutCart() {
       <div className={`slide-out-cart ${cart.isCartOpen ? 'open' : ''}`}>
         <div className="cart-drawer-header">
           <h2>Your Cart ({cart.items.length})</h2>
-          <button className="cart-drawer-close" onClick={cart.closeCart}>
+          <button aria-label="Close Cart" className="cart-drawer-close" onClick={cart.closeCart}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
@@ -91,9 +91,9 @@ export function SlideOutCart() {
                   {item.variantTitle && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>{item.variantTitle}</div>}
                   <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f1f5f9', borderRadius: '4px', padding: '2px 6px' }}>
-                      <button onClick={() => cart.updateQuantity(item.productId, item.quantity - 1, item.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>-</button>
+                      <button aria-label="Decrease quantity" onClick={() => cart.updateQuantity(item.productId, item.quantity - 1, item.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>-</button>
                       <span style={{ fontSize: '14px', fontWeight: 600 }}>{item.quantity}</span>
-                      <button onClick={() => cart.updateQuantity(item.productId, item.quantity + 1, item.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>+</button>
+                      <button aria-label="Increase quantity" onClick={() => cart.updateQuantity(item.productId, item.quantity + 1, item.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>+</button>
                     </div>
                     <div style={{ fontWeight: 700 }}>${item.totalPrice.toFixed(2)}</div>
                   </div>
@@ -102,6 +102,7 @@ export function SlideOutCart() {
                   onClick={() => cart.removeItem(item.productId, item.variantId)} 
                   style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '4px', alignSelf: 'flex-start' }}
                   title="Remove item"
+                  aria-label="Remove item"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
