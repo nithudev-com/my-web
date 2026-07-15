@@ -116,7 +116,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   }) : [];
 
   const faqs = parseFaqs(product.faq);
-  const faqSchema = faqs.length > 0 ? faqJsonLd(faqs) : null;
+  const faqSchema = faqs.length > 0 ? faqJsonLd(faqs, siteUrl(`/product/${product.slug}`)) : null;
   const productSchema = productJsonLd(product);
   const breadcrumbItems = [
     { name: "Home", url: "/" },
@@ -126,15 +126,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   ];
   const breadcrumbSchema = breadcrumbJsonLd(breadcrumbItems);
 
-  // Combine schemas into a single graph for maximum compatibility with all testing tools
-  const combinedSchema = {
-    "@context": "https://schema.org",
-    "@graph": [
-      productSchema,
-      breadcrumbSchema,
-      ...(faqSchema ? [faqSchema] : [])
-    ]
-  };
+  // Rendering schemas as separate scripts is proven to have higher compatibility with Google's Rich Results parser
 
   // Safe parsing for other JSON fields (features, details, etc.)
   const safeParseJSON = (data: any, fallback: any = []) => {
@@ -201,7 +193,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         @keyframes slideUp { to { transform: translateY(0); } }
       `}} />
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(combinedSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
       <ViewTracker productId={product.id.toString()} />
 
