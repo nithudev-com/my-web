@@ -22,12 +22,57 @@ export async function generateStaticParams() {
   return getTopProductSlugs(50);
 }
 
+function parseFaqs(raw: any): { question: string; answer: string }[] {
+  let arr: any[] = [];
+  if (Array.isArray(raw)) {
+    arr = raw;
+  } else if (raw && typeof raw === 'object') {
+    // Handle Prisma Json that may serialize as { '0': {...}, '1': {...} }
+    arr = Object.values(raw);
+  } else if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      arr = Array.isArray(parsed) ? parsed : Object.values(parsed);
+    } catch {
+      return [];
+    }
+  }
+  // Filter: must have non-empty question and answer strings
+  return arr.filter(
+    (f: any) =>
+      f &&
+      typeof f === 'object' &&
+      typeof f.question === 'string' && f.question.trim().length > 0 &&
+      typeof f.answer === 'string' && f.answer.trim().length > 0
+  ) as { question: string; answer: string }[];
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 
   if (!product) {
     return { title: "Product not found" };
+  }
+
+  // Build FAQ schema for <head> injection — most reliable location for Google Rich Results
+  const faqs = parseFaqs(product.faq);
+  const faqSchema = faqs.length > 0 ? faqJsonLd(faqs) : null;
+  const productSchema = productJsonLd(product);
+  const breadcrumbItems = [
+    { name: "Home", url: "/" },
+    ...(product.category ? [{ name: product.category.name, url: `/category/${product.category.slug}` }] : []),
+    ...(product.brand ? [{ name: product.brand.name, url: `/brand/${product.brand.slug}` }] : []),
+    { name: product.title, url: `/product/${product.slug}` }
+  ];
+  const breadcrumbSchema = breadcrumbJsonLd(breadcrumbItems);
+
+  const ldJsonScripts: Record<string, string> = {
+    'schema:product': JSON.stringify(productSchema),
+    'schema:breadcrumb': JSON.stringify(breadcrumbSchema),
+  };
+  if (faqSchema) {
+    ldJsonScripts['schema:faq'] = JSON.stringify(faqSchema);
   }
 
   return {
@@ -47,7 +92,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: product.seoTitle || product.title,
       description: product.seoDescription || product.shortDescription || product.title,
       images: product.mainImage ? [product.mainImage] : [],
-    }
+    },
+    other: ldJsonScripts,
   };
 }
 
@@ -78,30 +124,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     }
   }) : [];
 
+  const faqs = parseFaqs(product.faq);
+  // Schemas are now injected via generateMetadata into <head>.
+  // Keep inline scripts as a redundant fallback only.
+  const faqSchema = faqs.length > 0 ? faqJsonLd(faqs) : null;
+
+  // Safe parsing for other JSON fields (features, details, etc.)
   const safeParseJSON = (data: any, fallback: any = []) => {
     if (Array.isArray(data)) return data;
     if (typeof data === 'string') {
-      try {
-        const parsed = JSON.parse(data);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (e) {
-        return fallback;
-      }
+      try { const p = JSON.parse(data); if (Array.isArray(p)) return p; } catch { return fallback; }
     }
     return fallback;
   };
-
-  const faqs = safeParseJSON(product.faq);
-  const jsonLd = productJsonLd(product);
-  const faqSchema = faqJsonLd(faqs);
-  
-  const breadcrumbItems = [
-    { name: "Home", url: "/" },
-    ...(product.category ? [{ name: product.category.name, url: `/category/${product.category.slug}` }] : []),
-    ...(product.brand ? [{ name: product.brand.name, url: `/brand/${product.brand.slug}` }] : []),
-    { name: product.title, url: `/product/${product.slug}` }
-  ];
-  const breadcrumbSchema = breadcrumbJsonLd(breadcrumbItems);
 
   // Safe parsing for JSON fields
   const features = safeParseJSON(product.features);
@@ -159,10 +194,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         @keyframes slideUp { to { transform: translateY(0); } }
       `}} />
 
-      {/* Schemas */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* Schemas are injected in <head> via generateMetadata (other field) for maximum compatibility.
+           The FAQ schema below is an inline redundant backup only. */}
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       <ViewTracker productId={product.id.toString()} />
 
