@@ -1,245 +1,211 @@
-'use client';
-
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
-
-const SLIDES = [
-  {
-    id: 1,
-    image: "https://cdn.shopify.com/s/files/1/0280/7598/2985/files/ac54367d-838d-4806-a867-2a54e1307429.png?v=1766435278",
-    tagline: "✨ Pure Luxury & Elegance",
-    titleLine1: "Indulge in Your",
-    titleLine2: "Sensual Desires",
-    desc: "Discover our curated collection of ultra-premium intimate wellness products. Crafted with body-safe materials and designed for exquisite pleasure.",
-    link: "/category/vibrators",
-    accentColor: "#E0A96D", // Champagne Gold
-    glowColor: "rgba(224, 169, 109, 0.2)"
-  },
-  {
-    id: 2,
-    image: "https://cdn.shopify.com/s/files/1/0280/7598/2985/files/aff2d1be-727e-4449-8231-aaeb0ae67e2a.png?v=1782704692",
-    tagline: "🐰 Award-Winning Design",
-    titleLine1: "Dual Stimulation",
-    titleLine2: "Rabbit Vibrators",
-    desc: "Experience dual climax stimulation with our ergonomic rabbit vibrators, featuring whisper-quiet motors and luxurious medical-grade silicone.",
-    link: "/category/vibrators",
-    accentColor: "#D4A5A5", // Rose Gold / Warm Blush
-    glowColor: "rgba(212, 165, 165, 0.25)"
-  },
-  {
-    id: 3,
-    image: "https://cdn.shopify.com/s/files/1/0420/7699/5750/files/uni-vp01-a.jpg?v=1712681015",
-    tagline: "🥂 Sensual Togetherness",
-    titleLine1: "Uncompromising",
-    titleLine2: "Couples Play",
-    desc: "Elevate your intimate connections. Explore luxury remote-controlled toys, wellness essentials, and sensual accessories designed to build deeper bonds.",
-    link: "/category/bdsm",
-    accentColor: "#E0B0FF", // Mauve/Plum Accent
-    glowColor: "rgba(224, 176, 255, 0.2)"
-  }
-];
 import Image from "next/image";
+import React from "react";
 
 export function HeroBanner() {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  // Auto-slide every 7 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveIndex((current) => (current + 1) % SLIDES.length);
-    }, 7000);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
-    <div className="luxury-hero-container">
+    <div className="sale-hero-container">
       <style>{`
-        .luxury-hero-container {
+        .sale-hero-container {
           width: 100vw;
-          min-height: 80vh;
-          background: #180d15; /* Elegant deep plum background */
+          background: linear-gradient(135deg, #cc0000 0%, #660033 40%, #1a0033 100%);
           display: flex;
           align-items: center;
           justify-content: center;
           margin-left: calc(-50vw + 50%);
           margin-right: calc(-50vw + 50%);
-          padding: 120px 24px 80px 24px;
+          padding: 60px 24px;
           overflow: hidden;
           position: relative;
           font-family: var(--font-plus-jakarta), sans-serif;
         }
 
-        @media (max-width: 991px) {
-          .luxury-hero-container {
-            padding: 60px 16px 80px 16px;
-            min-height: auto;
-          }
-        }
-
-        /* Ambient luxury light beams & warm bokeh effects */
-        .luxury-glow-overlay {
+        /* Animated glowing sweeping lines */
+        .sale-hero-sweep {
           position: absolute;
-          inset: 0;
-          z-index: 1;
-          background: 
-            radial-gradient(circle at 80% 20%, rgba(224, 169, 109, 0.15) 0%, transparent 60%),
-            radial-gradient(circle at 20% 80%, rgba(212, 165, 165, 0.15) 0%, transparent 50%),
-            linear-gradient(180deg, rgba(24, 13, 21, 0.2) 0%, #180d15 95%);
+          width: 200%;
+          height: 100%;
+          top: 0;
+          left: -50%;
+          background: radial-gradient(ellipse at center, rgba(255,50,150,0.15) 0%, transparent 60%);
+          transform: rotate(-15deg);
+          animation: sweepMotion 8s linear infinite alternate;
           pointer-events: none;
         }
 
-        .luxury-hero-grid {
+        .sale-hero-sweep-2 {
+          position: absolute;
+          width: 150%;
+          height: 50%;
+          bottom: -20%;
+          left: -20%;
+          background: radial-gradient(ellipse at center, rgba(255,20,80,0.2) 0%, transparent 70%);
+          transform: rotate(10deg);
+          animation: sweepMotion 12s linear infinite alternate-reverse;
+          pointer-events: none;
+        }
+
+        @keyframes sweepMotion {
+          0% { transform: rotate(-15deg) translateY(0); }
+          100% { transform: rotate(-5deg) translateY(-50px); }
+        }
+
+        /* Stars/Sparkles */
+        .sale-sparkle {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: #fff;
+          border-radius: 50%;
+          box-shadow: 0 0 10px 2px #ff6699;
+          animation: twinkle 3s ease-in-out infinite;
+        }
+        .sale-sparkle-1 { top: 15%; right: 15%; }
+        .sale-sparkle-2 { top: 25%; right: 5%; animation-delay: 1s; width: 6px; height: 6px; }
+        .sale-sparkle-3 { top: 10%; right: 10%; animation-delay: 2s; }
+
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .sale-hero-grid {
           display: grid;
-          grid-template-columns: 1.1fr 1fr;
+          grid-template-columns: 1.4fr 0.8fr;
           align-items: center;
-          gap: 60px;
-          max-width: 1280px;
+          gap: 40px;
+          max-width: 1200px;
           width: 100%;
           position: relative;
           z-index: 3;
         }
 
         @media (max-width: 991px) {
-          .luxury-hero-grid {
+          .sale-hero-grid {
             grid-template-columns: 1fr;
             text-align: center;
-            gap: 40px;
+            gap: 30px;
           }
-          .luxury-visual-container {
-            margin-bottom: 90px;
+          .sale-header-row {
+            justify-content: center;
+          }
+          .sale-footer-row {
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px !important;
           }
         }
 
-        /* Typography & Info Layout */
-        .luxury-content-box {
+        /* Typography & Layout */
+        .sale-content-box {
           display: flex;
           flex-direction: column;
-          align-items: flex-start;
+          gap: 16px;
         }
 
-        @media (max-width: 991px) {
-          .luxury-content-box {
-            align-items: center;
-          }
-        }
-
-        .luxury-tagline {
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: #E0A96D; /* Champagne gold primary */
-          margin-bottom: 20px;
+        .sale-header-row {
           display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
+        .sale-logo-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .sale-logo-icon {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .sale-logo-text {
+          font-size: 32px;
+          font-weight: 900;
+          color: transparent;
+          -webkit-text-stroke: 1.5px rgba(255,255,255,0.95);
+          letter-spacing: -0.02em;
+          font-family: Arial, sans-serif;
+        }
+
+        .sale-badge {
+          background: linear-gradient(90deg, #ff0055, #cc0033);
+          color: #fff;
+          font-size: 14px;
+          font-weight: 900;
+          text-transform: uppercase;
+          padding: 6px 14px;
+          transform: rotate(-3deg);
+          box-shadow: 2px 4px 15px rgba(255, 0, 85, 0.4);
+          letter-spacing: 0.5px;
+        }
+
+        .sale-title {
+          font-size: clamp(40px, 6vw, 76px);
+          font-weight: 900;
+          line-height: 1.1;
+          color: #ffffff;
+          text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+          margin: 10px 0;
+          letter-spacing: -0.02em;
+        }
+
+        .sale-footer-row {
+          display: flex;
+          align-items: center;
+          gap: 32px;
+          margin-top: 12px;
+        }
+
+        .sale-guarantee {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          color: #fff;
+          font-size: 17px;
+          font-weight: 600;
+          letter-spacing: -0.01em;
+        }
+
+        .sale-star-circle {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: 2px solid #ff3366;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #ff3366;
+          box-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+        }
+
+        .btn-sale-primary {
+          background: linear-gradient(180deg, #ff0044, #aa0022);
+          color: #fff;
+          font-size: 22px;
+          font-weight: 800;
+          text-decoration: none;
+          padding: 14px 40px;
+          border-radius: 40px;
+          border: 2px solid rgba(255,255,255,0.4);
+          box-shadow: 0 8px 25px rgba(255, 0, 68, 0.5), inset 0 2px 4px rgba(255,255,255,0.3);
+          transition: all 0.2s ease;
+          display: inline-flex;
           align-items: center;
           gap: 8px;
         }
 
-        .luxury-title {
-          font-family: var(--font-playfair), serif;
-          font-size: 64px;
-          font-weight: 400;
-          line-height: 1.1;
-          color: #ffffff;
-          margin-bottom: 24px;
-          letter-spacing: -0.01em;
+        .btn-sale-primary:hover {
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 12px 30px rgba(255, 0, 68, 0.7), inset 0 2px 4px rgba(255,255,255,0.4);
         }
 
-        .luxury-title-italic {
-          font-family: var(--font-playfair), serif;
-          font-style: italic;
-          color: #E0A96D; /* Warm gold/rose accent */
-          font-weight: 400;
-        }
-
-        @media (max-width: 768px) {
-          .luxury-title {
-            font-size: 38px;
-            line-height: 1.2;
-          }
-          .luxury-desc {
-            font-size: 15px;
-            margin-bottom: 24px;
-          }
-          .luxury-glass-card {
-            max-width: 300px;
-            padding: 24px;
-          }
-        }
-
-        .luxury-desc {
-          font-size: 17px;
-          line-height: 1.7;
-          color: rgba(255, 255, 255, 0.75);
-          margin-bottom: 40px;
-          max-width: 540px;
-        }
-
-        .luxury-actions {
-          display: flex;
-          gap: 20px;
-        }
-
-        @media (max-width: 600px) {
-          .luxury-actions {
-            flex-direction: column;
-            width: 100%;
-          }
-        }
-
-        .btn-luxury-primary {
-          padding: 18px 42px;
-          border-radius: 4px;
-          font-size: 15px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          text-decoration: none;
-          background: #E0A96D; /* Elegant Champagne Gold */
-          color: #180d15;
-          box-shadow: 0 10px 25px rgba(224, 169, 109, 0.25);
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          border: 1px solid #E0A96D;
-          cursor: pointer;
-        }
-
-        .btn-luxury-primary:hover {
-          transform: translateY(-3px);
-          background: transparent;
-          color: #E0A96D;
-          box-shadow: 0 15px 30px rgba(224, 169, 109, 0.15);
-        }
-
-        .btn-luxury-secondary {
-          padding: 18px 42px;
-          border-radius: 4px;
-          font-size: 15px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          text-decoration: none;
-          background: transparent;
-          color: #ffffff;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .btn-luxury-secondary:hover {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: #E0A96D;
-          color: #E0A96D;
-          transform: translateY(-3px);
-        }
-
-        /* Luxury Showcase Box */
-        .luxury-visual-container {
+        /* Right Side: Showcase */
+        .sale-visual-container {
           position: relative;
           display: flex;
           align-items: center;
@@ -247,175 +213,84 @@ export function HeroBanner() {
           width: 100%;
         }
 
-        .luxury-glass-card {
+        .sale-product-img {
           width: 100%;
-          max-width: 440px;
-          aspect-ratio: 1 / 1;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.015);
-          border: 1px solid rgba(224, 169, 109, 0.15);
-          backdrop-filter: blur(25px);
-          -webkit-backdrop-filter: blur(25px);
-          padding: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          z-index: 3;
-          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-          animation: luxuryFloat 8s ease-in-out infinite;
-        }
-
-        @keyframes luxuryFloat {
-          0% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(0.5deg); }
-          100% { transform: translateY(0) rotate(0deg); }
-        }
-
-        .luxury-image-wrapper {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .luxury-slide-img {
-          position: absolute;
-          max-width: 90%;
-          max-height: 90%;
+          max-width: 420px;
+          height: auto;
           object-fit: contain;
-          opacity: 0;
-          transform: scale(0.92) translateY(15px);
-          filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
-          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .luxury-slide-img.active {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-          z-index: 2;
-        }
-
-        /* Fine ornamental gold ring behind card */
-        .luxury-gold-ring {
-          position: absolute;
-          width: 82%;
-          height: 82%;
-          border-radius: 50%;
-          border: 1px dashed rgba(224, 169, 109, 0.25);
-          z-index: 1;
-          animation: spinRing 40s linear infinite;
-        }
-
-        @keyframes spinRing {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        /* Slider Indicators */
-        .luxury-dots-bar {
-          display: flex;
-          gap: 12px;
-          position: absolute;
-          bottom: -70px;
+          filter: drop-shadow(0 30px 40px rgba(0,0,0,0.6));
+          animation: floatSlow 6s ease-in-out infinite;
           z-index: 5;
         }
 
-        .luxury-dot {
-          width: 32px;
-          height: 3px;
-          background: rgba(255, 255, 255, 0.15);
-          border: none;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          padding: 0;
+        @keyframes floatSlow {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(2deg); }
         }
 
-        .luxury-dot:hover {
-          background: rgba(255, 255, 255, 0.4);
-        }
-
-        .luxury-dot.active {
-          background: #E0A96D;
-          box-shadow: 0 0 10px rgba(224, 169, 109, 0.5);
-        }
-
-        .luxury-animate-in {
-          animation: luxuryFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes luxuryFadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+        @media (max-width: 991px) {
+          .sale-product-img {
+            max-width: 320px;
+          }
         }
       `}</style>
 
       {/* Decorative overlays */}
-      <div className="luxury-glow-overlay" />
+      <div className="sale-hero-sweep" />
+      <div className="sale-hero-sweep-2" />
+      
+      <div className="sale-sparkle sale-sparkle-1"></div>
+      <div className="sale-sparkle sale-sparkle-2"></div>
+      <div className="sale-sparkle sale-sparkle-3"></div>
 
-      <div className="luxury-hero-grid">
+      <div className="sale-hero-grid">
         
         {/* Left Side: Typography */}
-        <div key={activeIndex} className="luxury-content-box luxury-animate-in">
-          <span className="luxury-tagline" style={{ color: SLIDES[activeIndex].accentColor }}>
-            {SLIDES[activeIndex].tagline}
-          </span>
-          <h1 className="luxury-title">
-            {SLIDES[activeIndex].titleLine1}<br />
-            <span className="luxury-title-italic" style={{ color: SLIDES[activeIndex].accentColor }}>{SLIDES[activeIndex].titleLine2}</span>
-          </h1>
-          <p className="luxury-desc">
-            {SLIDES[activeIndex].desc}
-          </p>
+        <div className="sale-content-box">
           
-          <div className="luxury-actions">
-            <Link href={SLIDES[activeIndex].link} className="btn-luxury-primary" style={{ background: SLIDES[activeIndex].accentColor, borderColor: SLIDES[activeIndex].accentColor, color: '#180d15' }}>
-              Explore Collection
-            </Link>
-            <Link href="/deals" className="btn-luxury-secondary">
-              View Offers
+          <div className="sale-header-row">
+            <div className="sale-logo-group">
+              <img src="/heart-device.png" alt="Logo" className="sale-logo-icon" />
+              <span className="sale-logo-text">SexToys Lovers</span>
+            </div>
+            <div className="sale-badge">
+              JUST LAUNCHED!
+            </div>
+          </div>
+
+          <h1 className="sale-title">
+            Save Up To 90%<br />
+            RRP In Our Sample Sale!
+          </h1>
+          
+          <div className="sale-footer-row">
+            <div className="sale-guarantee">
+              <div className="sale-star-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+              New Toys Added Regularly
+            </div>
+            
+            <Link href="/deals" className="btn-sale-primary">
+              Shop The Sale <span style={{fontSize:'26px', lineHeight:0}}>›</span>
             </Link>
           </div>
         </div>
 
-        {/* Right Side: Showcase */}
-        <div className="luxury-visual-container">
-          <div className="luxury-gold-ring" style={{ borderColor: `rgba(${SLIDES[activeIndex].accentColor === '#E0A96D' ? '224, 169, 109' : SLIDES[activeIndex].accentColor === '#D4A5A5' ? '212, 165, 165' : '224, 176, 255'}, 0.25)` }} />
-          
-          <div className="luxury-glass-card" style={{ borderColor: `rgba(${SLIDES[activeIndex].accentColor === '#E0A96D' ? '224, 169, 109' : SLIDES[activeIndex].accentColor === '#D4A5A5' ? '212, 165, 165' : '224, 176, 255'}, 0.2)` }}>
-            <div className="luxury-image-wrapper">
-              {SLIDES.map((slide, index) => (
-                <Image 
-                  key={slide.id}
-                  src={slide.image} 
-                  alt={slide.titleLine1 + ' ' + slide.titleLine2} 
-                  className={`luxury-slide-img ${index === activeIndex ? "active" : ""}`}
-                  priority={index === 0}
-                  fetchPriority={index === 0 ? "high" : "auto"}
-                  loading={index === 0 ? "eager" : "lazy"}
-                  fill
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Dots */}
-          <div className="luxury-dots-bar">
-            {SLIDES.map((_, index) => (
-              <button
-                key={index}
-                className={`luxury-dot ${index === activeIndex ? "active" : ""}`}
-                onClick={() => setActiveIndex(index)}
-                aria-label={`Go to slide ${index + 1}`}
-                style={{
-                  backgroundColor: index === activeIndex ? SLIDES[activeIndex].accentColor : 'rgba(255, 255, 255, 0.15)'
-                }}
-              />
-            ))}
-          </div>
-
+        {/* Right Side: Visual */}
+        <div className="sale-visual-container">
+          <Image 
+            src="/heart-device.png" 
+            alt="Premium Vibrator Heart" 
+            width={600}
+            height={600}
+            className="sale-product-img"
+            priority={true}
+            fetchPriority="high"
+            loading="eager"
+          />
         </div>
 
       </div>
