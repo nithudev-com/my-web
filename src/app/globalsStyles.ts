@@ -45,7 +45,7 @@ img {
 .mega-header-wrapper {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 9999;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -240,7 +240,7 @@ img {
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 9999;
 }
 
 .mobile-header-top {
