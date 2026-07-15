@@ -1,4 +1,4 @@
-:root {
+export const globalCss = `:root {
   --bg: #f8fafc;
   --card: #ffffff;
   --text: #0f172a;
@@ -2476,4 +2476,4 @@ img {
   top: 12px;
   right: 12px;
   z-index: 10;
-}
+}`;
