@@ -82,7 +82,7 @@ export default async function ContactPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#111111' }}>Email Us</h3>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>support@speedcommerce.com<br/>We reply within 24 hours.</p>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>info@sextoyslovers.com<br/>We reply within 24 hours.</p>
                 </div>
               </div>
 

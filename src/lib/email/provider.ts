@@ -16,7 +16,7 @@ export class SMTPProvider implements EmailProvider {
   private fromAddress: string;
 
   constructor() {
-    this.fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@yourstore.com";
+    this.fromAddress = process.env.EMAIL_FROM_ADDRESS || "info@sextoyslovers.com";
     
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || "smtp.hostinger.com",
