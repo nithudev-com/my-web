@@ -17,10 +17,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    getWishlistProductIds().then((ids) => {
-      setWishlistIds(new Set(ids.map(id => id.toString())));
-      setIsLoaded(true);
-    });
+    // Disabled server fetch per user request for "lightning fast" speed
+    setIsLoaded(true);
 
     const handleWishlistUpdated = (e: Event) => {
       const customEvent = e as CustomEvent;

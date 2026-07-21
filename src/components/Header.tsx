@@ -50,13 +50,6 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
               <span>Account</span>
             </Link>
             
-            <Link prefetch={true} href="/account/wishlist" className="header-action-item">
-              <div className="header-action-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                {wishlistCount > 0 && <span className="header-badge">{wishlistCount}</span>}
-              </div>
-              <span>Wishlist</span>
-            </Link>
 
             <button aria-label="Open Cart" onClick={cart.openCart} className="header-action-item" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'inherit' }}>
               <div className="header-action-icon">
@@ -193,7 +186,6 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
           <h3 className="mobile-drawer-title">My Account</h3>
           <div className="mobile-drawer-links">
             <Link prefetch={true} href="/account/orders" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Orders</Link>
-            <Link prefetch={true} href="/account/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Wishlist</Link>
             <Link prefetch={true} href="/account/profile" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Account Settings</Link>
           </div>
         </div>
