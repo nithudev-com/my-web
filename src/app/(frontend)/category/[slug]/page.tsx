@@ -42,11 +42,11 @@ export default async function CategoryPage({ params, searchParams }: { params: P
 
   const productIds = (products || []).map((p) => BigInt(p.id.toString()));
   const getCategoryPageData = unstable_cache(
-    async (categoryId: bigint, productIdsString: string) => {
+    async (categoryId: string | bigint, productIdsString: string) => {
       const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
       const [subcategories, reviewStats] = await Promise.all([
         prisma.category.findMany({
-          where: { parentId: categoryId },
+          where: { parentId: BigInt(categoryId) },
           orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
           select: { id: true, name: true, slug: true, image: true }
         }),

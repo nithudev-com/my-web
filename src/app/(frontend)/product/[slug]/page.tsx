@@ -101,10 +101,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   // Related Products Query (Cached)
   const getRelatedProducts = unstable_cache(
-    async (categoryId: bigint | null, excludeId: bigint) => {
+    async (categoryId: string | bigint | null, excludeId: string | bigint) => {
       if (!categoryId) return [];
       return prisma.product.findMany({
-        where: { categoryId: categoryId, id: { not: excludeId }, status: 'ACTIVE' },
+        where: { categoryId: BigInt(categoryId), id: { not: BigInt(excludeId) }, status: 'ACTIVE' },
         take: 4,
         select: { 
           id: true, 
