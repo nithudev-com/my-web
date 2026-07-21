@@ -1,7 +1,18 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://xyzcompany.supabase.co';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'public-anon-key';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_API_KEY
+);
+
+// Test the connection
+supabase
+  .from('Category')
+  .select('*')
+  .limit(1)
+  .then(({ data, error }) => {
+    if (error) console.error('Connection error:', error);
+    else console.log('Connected to Supabase:', data);
+  });
 
 module.exports = supabase;
