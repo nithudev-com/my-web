@@ -16,10 +16,13 @@ function fixPrismaUrl(url: string | undefined): string | undefined {
     let password = match[2];
     const suffix = match[3];
     
-    if (password.includes("@")) {
-      password = password.replace(/@/g, "%40");
-      return `${prefix}${password}${suffix}`;
-    }
+    // Hostinger sometimes escapes the % sign as \% in its backend. Unescape it first.
+    password = password.replace(/\\%/g, "%");
+    
+    // Then, replace any literal @ with %40
+    password = password.replace(/@/g, "%40");
+    
+    return `${prefix}${password}${suffix}`;
   }
   return url;
 }
