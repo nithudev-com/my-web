@@ -2,38 +2,13 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrismaV7 = globalThis as unknown as { prisma?: PrismaClient };
 
-/**
- * Hostinger Environment Fixer
- * Hostinger's panel often passes passwords with a literal `@` (unencoded), which crashes Prisma.
- * This dynamically intercepts the environment variables and encodes the password safely.
- */
-function fixPrismaUrl(url: string | undefined): string | undefined {
-  if (!url) return url;
-  // Matches: 1=postgresql://user:  2=password  3=@host:port/db...
-  const match = url.match(/^(postgresql:\/\/[^:]+:)(.*)(@[^@]+:\d+\/.*)$/);
-  if (match) {
-    const prefix = match[1];
-    let password = match[2];
-    const suffix = match[3];
-    
-    // Hostinger sometimes escapes the % sign as \% in its backend. Unescape it first.
-    password = password.replace(/\\%/g, "%");
-    
-    // Then, replace any literal @ with %40
-    password = password.replace(/@/g, "%40");
-    
-    return `${prefix}${password}${suffix}`;
-  }
-  return url;
-}
+// We must hardcode the URL because Hostinger's Auto Deploy system does NOT provide 
+// environment variables (like DATABASE_URL) to the "npm run build" process. 
+// Without this, Next.js fails to statically generate the pages during deployment.
+const fixedUrl = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1";
 
-// Dynamically fix the environment variables from the Hostinger panel before Prisma loads them
-if (process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = fixPrismaUrl(process.env.DATABASE_URL)!;
-}
-if (process.env.DIRECT_URL) {
-  process.env.DIRECT_URL = fixPrismaUrl(process.env.DIRECT_URL)!;
-}
+process.env.DATABASE_URL = fixedUrl;
+process.env.DIRECT_URL = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:5432/postgres";
 
 // Prevent "OS can't spawn worker thread (os error 11)" on Hostinger shared servers
 process.env.TOKIO_WORKER_THREADS = "1";
@@ -41,9 +16,11 @@ process.env.TOKIO_WORKER_THREADS = "1";
 export const prisma =
   globalForPrismaV7.prisma ??
   new PrismaClient({
-    ...(process.env.DATABASE_URL
-      ? { datasources: { db: { url: process.env.DATABASE_URL } } }
-      : {}),
+    datasources: {
+      db: {
+        url: fixedUrl
+      }
+    },
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]
   });
 
