@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
-import { revalidateTag } from 'next/cache';
+import { revalidateTag, unstable_cache } from 'next/cache';
 
-export async function getStoreSettings() {
+const fetchSettings = async () => {
   try {
     let settings = await prisma.storeSettings.findUnique({
       where: { id: 1 }
@@ -36,7 +36,15 @@ export async function getStoreSettings() {
       taxRate: 0
     };
   }
-}
+};
+
+export const getStoreSettings = unstable_cache(
+  async () => {
+    return await fetchSettings();
+  },
+  ['store-settings-cache'],
+  { tags: ['store-settings'], revalidate: 3600 }
+);
 
 export async function updateStoreSettings(data: any) {
   try {

@@ -12,6 +12,13 @@ import { getSitemapCategories } from "@/services/products";
 export const revalidate = 1800;
 export const dynamicParams = true;
 
+export async function generateStaticParams() {
+  const categories = await getSitemapCategories();
+  return categories.map((cat) => ({
+    slug: cat.slug,
+  }));
+}
+
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

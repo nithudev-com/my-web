@@ -20,8 +20,8 @@ const nextConfig = {
     workerThreads: false,
     cpus: 1,
     staleTimes: {
-      dynamic: 30,
-      static: 180,
+      dynamic: 3600,
+      static: 86400,
     }
   }
 };

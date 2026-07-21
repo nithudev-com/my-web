@@ -21,7 +21,12 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return [];
+  try {
+    const products = await getTopProductSlugs(500); // Pre-build top 500 for lightning speed
+    return products;
+  } catch (e) {
+    return [];
+  }
 }
 
 function parseFaqs(raw: any): { question: string; answer: string }[] {
