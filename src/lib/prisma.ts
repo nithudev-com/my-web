@@ -2,15 +2,9 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrismaV7 = globalThis as unknown as { prisma?: PrismaClient };
 
-// Force Hostinger to use the DIRECT_URL (5432) even if the panel has the PgBouncer URL (6543)
-// This prevents ECIRCUITBREAKER and authentication failures caused by unencoded @ symbols or pool timeouts.
-let fixedUrl = process.env.DATABASE_URL;
-if (fixedUrl && fixedUrl.includes("6543")) {
-  fixedUrl = fixedUrl
-    .replace(":6543/postgres?pgbouncer=true&connection_limit=1&pool_timeout=0", ":5432/postgres")
-    .replace(":6543/postgres?pgbouncer=true", ":5432/postgres")
-    .replace(":6543", ":5432");
-}
+// Force the exact correct DATABASE_URL because Hostinger's environment variable panel
+// automatically unescapes '%40' to '@', which breaks the Prisma Postgres parser.
+const fixedUrl = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:5432/postgres";
 
 export const prisma =
   globalForPrismaV7.prisma ??
