@@ -10,6 +10,10 @@ export function getRedis() {
     globalForRedis.redis = new IORedis(url, {
       maxRetriesPerRequest: null
     });
+
+    globalForRedis.redis.on('error', (err) => {
+      console.error('Redis connection error:', err.message);
+    });
   }
 
   return globalForRedis.redis;

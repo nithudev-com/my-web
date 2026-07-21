@@ -15,6 +15,12 @@ export const emailQueue = redisConnection ? new Queue("emailQueue", {
   }
 }) : null;
 
+if (emailQueue) {
+  emailQueue.on("error", (err) => {
+    console.error("BullMQ emailQueue error:", err.message);
+  });
+}
+
 
 export const QueueEmailSchema = z.object({
   idempotencyKey: z.string().min(1),
