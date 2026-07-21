@@ -8,85 +8,62 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum ProductStatus {
-  DRAFT
-  ACTIVE
-  ARCHIVED
-}
-
-enum StockStatus {
-  IN_STOCK
-  OUT_OF_STOCK
-  BACKORDER
-}
-
-enum ImportStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-}
-
 model Product {
-  id              BigInt        @id @default(autoincrement())
-  sku             String        @unique
-  barcode         String?
-  title           String
-  slug            String        @unique
-  shortDescription String?
-  description     String?
-  status          ProductStatus @default(ACTIVE)
-  basePrice       Decimal       @db.Decimal(12, 2)
-  salePrice       Decimal?      @db.Decimal(12, 2)
-  stockStatus     StockStatus   @default(IN_STOCK)
-  stockQuantity   Int           @default(0)
-  lowStockLimit   Int?
-  mainImage       String?
-  videoUrl        String?
-  seoTitle        String?
-  seoDescription  String?
-  canonicalUrl    String?
-  faq             Json?
-  details         Json?
-  saleStartDate   DateTime?
-  saleEndDate     DateTime?
-  weight          Decimal?      @db.Decimal(10, 2)
-  length          Decimal?      @db.Decimal(10, 2)
-  width           Decimal?      @db.Decimal(10, 2)
-  height          Decimal?      @db.Decimal(10, 2)
-  shippingInfo    Json?
-  returnInfo      String?
-  warrantyInfo    String?
-  isFeatured      Boolean       @default(false)
-  
-  // AI Product Manager Fields
-  productType       String?
-  focusKeyword      String?
-  secondaryKeywords Json?
-  ogTitle           String?
-  ogDescription     String?
-  readinessScore    Int           @default(0)
-  validationStatus  String?
-  generatedByAI     Boolean       @default(false)
+  id                BigInt              @id @default(autoincrement())
+  sku               String              @unique
+  title             String
+  slug              String              @unique
+  shortDescription  String?
+  description       String?
+  status            ProductStatus       @default(ACTIVE)
+  basePrice         Decimal             @db.Decimal(12, 2)
+  salePrice         Decimal?            @db.Decimal(12, 2)
+  stockStatus       StockStatus         @default(IN_STOCK)
+  stockQuantity     Int                 @default(0)
+  mainImage         String?
+  seoTitle          String?
+  seoDescription    String?
+  canonicalUrl      String?
+  categoryId        BigInt?
+  brandId           BigInt?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  details           Json?
+  faq               Json?
   benefits          Json?
   features          Json?
+  focusKeyword      String?
+  generatedByAI     Boolean             @default(false)
+  ogDescription     String?
+  ogTitle           String?
+  productType       String?
+  readinessScore    Int                 @default(0)
+  secondaryKeywords Json?
   specifications    Json?
   tags              Json?
-  
-  categoryId      BigInt?
-  brandId         BigInt?
-  importBatchId   String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-
-  category        Category?     @relation(fields: [categoryId], references: [id])
-  brand           Brand?        @relation(fields: [brandId], references: [id])
-  importBatch     ProductImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
-  variants        ProductVariant[]
-  images          ProductImage[]
-  reviews         Review[]
-  wishlistedItems WishlistItem[]
-  blogs           BlogPost[]    @relation("ProductToBlog")
+  validationStatus  String?
+  videoUrl          String?
+  height            Decimal?            @db.Decimal(10, 2)
+  isFeatured        Boolean             @default(false)
+  length            Decimal?            @db.Decimal(10, 2)
+  lowStockLimit     Int?
+  returnInfo        String?
+  saleEndDate       DateTime?
+  saleStartDate     DateTime?
+  shippingInfo      Json?
+  warrantyInfo      String?
+  weight            Decimal?            @db.Decimal(10, 2)
+  width             Decimal?            @db.Decimal(10, 2)
+  importBatchId     String?
+  barcode           String?
+  blogs             BlogPost[]          @relation("ProductToBlog")
+  brand             Brand?              @relation(fields: [brandId], references: [id])
+  category          Category?           @relation(fields: [categoryId], references: [id])
+  importBatch       ProductImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
+  images            ProductImage[]
+  variants          ProductVariant[]
+  reviews           Review[]
+  wishlistedItems   WishlistItem[]
 
   @@index([status])
   @@index([categoryId, status])
@@ -98,17 +75,16 @@ model ProductVariant {
   id            BigInt      @id @default(autoincrement())
   productId     BigInt
   sku           String      @unique
-  barcode       String?
   price         Decimal     @db.Decimal(12, 2)
   salePrice     Decimal?    @db.Decimal(12, 2)
   stockQuantity Int         @default(0)
   stockStatus   StockStatus @default(IN_STOCK)
-  image         String?
-  isEnabled     Boolean     @default(true)
   attributes    Json?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-
+  image         String?
+  isEnabled     Boolean     @default(true)
+  barcode       String?
   product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
@@ -117,19 +93,18 @@ model ProductVariant {
 }
 
 model Category {
-  id             BigInt    @id @default(autoincrement())
+  id             BigInt     @id @default(autoincrement())
   name           String
-  slug           String    @unique
-  image          String?
+  slug           String     @unique
   parentId       BigInt?
   seoTitle       String?
   seoDescription String?
-  showOnHome     Boolean   @default(false)
-  sortOrder      Int       @default(0)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  parent         Category? @relation("CategoryTree", fields: [parentId], references: [id])
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  image          String?
+  showOnHome     Boolean    @default(false)
+  sortOrder      Int        @default(0)
+  parent         Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children       Category[] @relation("CategoryTree")
   products       Product[]
 
@@ -143,28 +118,26 @@ model Brand {
   logo           String?
   seoTitle       String?
   seoDescription String?
-  showOnHome     Boolean   @default(true)
-  faqs           Json?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
-
+  showOnHome     Boolean   @default(true)
+  faqs           Json?
   products       Product[]
 }
 
 model ProductImage {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt  @id @default(autoincrement())
   productId BigInt
   imageUrl  String
+  altText   String?
+  sortOrder Int     @default(0)
+  bytes     Int?
+  format    String?
+  height    Int?
+  isPrimary Boolean @default(false)
   publicId  String?
   width     Int?
-  height    Int?
-  format    String?
-  bytes     Int?
-  altText   String?
-  sortOrder Int      @default(0)
-  isPrimary Boolean  @default(false)
-
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, sortOrder])
 }
@@ -178,53 +151,50 @@ model Review {
   author    String?
   approved  Boolean  @default(false)
   createdAt DateTime @default(now())
-
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, approved])
 }
 
 model ProductImportBatch {
-  id          String       @id
+  id          String             @id
   filename    String?
-  status      ImportStatus @default(PENDING)
-  updateMode  String       @default("FULL") // "FULL" or "PRICE_STOCK_ONLY"
-  totalRows   Int          @default(0)
-  successRows Int          @default(0)
-  failedRows  Int          @default(0)
+  status      ImportStatus       @default(PENDING)
+  totalRows   Int                @default(0)
+  successRows Int                @default(0)
+  failedRows  Int                @default(0)
   message     String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  rows        ProductImportRow[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  updateMode  String             @default("FULL")
   products    Product[]
+  rows        ProductImportRow[]
 }
 
 model ProductImportRow {
-  id           BigInt   @id @default(autoincrement())
-  batchId      String
-  rowNumber    Int
-  sku          String?
-  barcode      String?
-  variantImage String?
-  title        String?
-  slug         String?
-  categorySlug String?
-  categoryName String?
-  brandSlug    String?
-  brandName    String?
-  price        Decimal? @db.Decimal(12, 2)
-  salePrice    Decimal? @db.Decimal(12, 2)
-  stockQuantity Int?
-  imageUrl     String?
-  seoTitle     String?
+  id             BigInt             @id @default(autoincrement())
+  batchId        String
+  rowNumber      Int
+  sku            String?
+  title          String?
+  slug           String?
+  categorySlug   String?
+  categoryName   String?
+  brandSlug      String?
+  brandName      String?
+  price          Decimal?           @db.Decimal(12, 2)
+  salePrice      Decimal?           @db.Decimal(12, 2)
+  stockQuantity  Int?
+  imageUrl       String?
+  seoTitle       String?
   seoDescription String?
-  rawData      Json?
-  errorMessage String?
-  processedAt  DateTime?
-  createdAt    DateTime @default(now())
-
-  batch        ProductImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  rawData        Json?
+  errorMessage   String?
+  processedAt    DateTime?
+  createdAt      DateTime           @default(now())
+  barcode        String?
+  variantImage   String?
+  batch          ProductImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
 
   @@index([batchId])
   @@index([batchId, errorMessage])
@@ -236,7 +206,7 @@ model Currency {
   code         String   @unique
   name         String
   symbol       String
-  exchangeRate Decimal  @db.Decimal(10, 4) @default(1.0000)
+  exchangeRate Decimal  @default(1.0000) @db.Decimal(10, 4)
   isDefault    Boolean  @default(false)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -244,25 +214,25 @@ model Currency {
 }
 
 model Customer {
-  id           BigInt   @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  firstName        String?
-  lastName         String?
-  phone            String?
-  acceptTerms      Boolean  @default(false)
-  marketingConsent Boolean  @default(false)
-  ageConfirmed     Boolean  @default(false)
-  isBlocked        Boolean  @default(false)
-  orders           Int      @default(0)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  addresses        CustomerAddress[]
-  wishlist         Wishlist?
+  id                   BigInt                @id @default(autoincrement())
+  email                String                @unique
+  passwordHash         String
+  firstName            String?
+  lastName             String?
+  orders               Int                   @default(0)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  acceptTerms          Boolean               @default(false)
+  marketingConsent     Boolean               @default(false)
+  phone                String?
+  ageConfirmed         Boolean               @default(false)
+  isBlocked            Boolean               @default(false)
   contactConversations ContactConversation[]
-  emailPreferences EmailPreference?
-  emailJobs        EmailJob[]
+  addresses            CustomerAddress[]
+  emailJobs            EmailJob[]
+  emailPreferences     EmailPreference?
+  wishlist             Wishlist?
+  notifications        Notification[]
 
   @@index([email])
 }
@@ -283,64 +253,51 @@ model CustomerAddress {
   isDefaultBilling  Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
   customer          Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([customerId])
 }
 
 model ShippingMethod {
-  id              BigInt    @id @default(autoincrement())
-  name            String
-  price           Decimal   @db.Decimal(12, 2)
-  estimatedDays   String?
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id            BigInt   @id @default(autoincrement())
+  name          String
+  price         Decimal  @db.Decimal(12, 2)
+  estimatedDays String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Coupon {
-  id              BigInt    @id @default(autoincrement())
-  code            String    @unique
-  discountType    String    // 'PERCENTAGE' or 'FIXED'
-  discountValue   Decimal   @db.Decimal(12, 2)
-  minOrderValue   Decimal?  @db.Decimal(12, 2)
-  isActive        Boolean   @default(true)
-  expiresAt       DateTime?
-  usageLimit      Int?
-  usageCount      Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id            BigInt    @id @default(autoincrement())
+  code          String    @unique
+  discountType  String
+  discountValue Decimal   @db.Decimal(12, 2)
+  minOrderValue Decimal?  @db.Decimal(12, 2)
+  isActive      Boolean   @default(true)
+  expiresAt     DateTime?
+  usageLimit    Int?
+  usageCount    Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([code])
 }
 
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  PAID
-  DELIVERED
-  FAILED
-  CANCELLED
-  EXPIRED
-  REFUNDED
-}
-
 model PaymentGateway {
-  id          BigInt   @id @default(autoincrement())
-  name        String   @unique
-  merchantId  String?
-  publicKey   String?
-  secretKey   String?
-  isActive    Boolean  @default(false)
-  isTestMode  Boolean  @default(true)
-  updatedAt   DateTime @updatedAt
+  id         BigInt   @id @default(autoincrement())
+  name       String   @unique
+  merchantId String?
+  publicKey  String?
+  secretKey  String?
+  isActive   Boolean  @default(false)
+  isTestMode Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
 }
 
 model Order {
   id              BigInt      @id @default(autoincrement())
   orderNumber     String      @unique
-  secureToken     String      @unique @default(cuid())
   customerId      BigInt?
   customerEmail   String
   totalAmount     Decimal     @db.Decimal(12, 2)
@@ -351,7 +308,7 @@ model Order {
   billingAddress  Json?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
-
+  secureToken     String      @unique @default(cuid())
   items           OrderItem[]
 
   @@index([orderNumber])
@@ -360,27 +317,25 @@ model Order {
 }
 
 model OrderItem {
-  id            BigInt   @id @default(autoincrement())
-  orderId       BigInt
-  productId     BigInt
-  variantId     BigInt?
-  title         String
-  quantity      Int
-  unitPrice     Decimal  @db.Decimal(12, 2)
-  totalPrice    Decimal  @db.Decimal(12, 2)
-  
-  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id         BigInt  @id @default(autoincrement())
+  orderId    BigInt
+  productId  BigInt
+  variantId  BigInt?
+  title      String
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(12, 2)
+  totalPrice Decimal @db.Decimal(12, 2)
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
 }
 
 model Wishlist {
-  id         BigInt   @id @default(autoincrement())
-  customerId BigInt   @unique
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  id         BigInt         @id @default(autoincrement())
+  customerId BigInt         @unique
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  customer   Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
   items      WishlistItem[]
 }
 
@@ -390,12 +345,200 @@ model WishlistItem {
   productId  BigInt
   variantId  BigInt?
   createdAt  DateTime @default(now())
-
-  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
 
   @@unique([wishlistId, productId, variantId])
   @@index([wishlistId])
+}
+
+model ContactConversation {
+  id               BigInt           @id @default(autoincrement())
+  conversationId   String           @unique @default(cuid())
+  customerId       BigInt?
+  guestName        String?
+  guestEmail       String?
+  guestPhone       String?
+  guestToken       String?          @unique
+  category         String
+  orderId          String?
+  subject          String
+  status           ContactStatus    @default(NEW)
+  priority         ContactPriority  @default(NORMAL)
+  assignedAdminId  BigInt?
+  source           String           @default("WEB_FORM")
+  isReadByAdmin    Boolean          @default(false)
+  isReadByCustomer Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  lastReplyAt      DateTime?
+  closedAt         DateTime?
+  customer         Customer?        @relation(fields: [customerId], references: [id])
+  messages         ContactMessage[]
+
+  @@index([customerId])
+  @@index([guestEmail])
+  @@index([status])
+  @@index([guestToken])
+}
+
+model ContactMessage {
+  id               BigInt              @id @default(autoincrement())
+  conversationId   BigInt
+  senderType       String
+  senderCustomerId BigInt?
+  senderAdminId    BigInt?
+  body             String
+  attachment       String?
+  createdAt        DateTime            @default(now())
+  readAt           DateTime?
+  conversation     ContactConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+model StoreSettings {
+  id                  Int      @id @default(1)
+  storeName           String   @default("SpeedCommerce")
+  storeDescription    String   @default("Your premium destination for the world's best products. Fast shipping, secure payments, and 24/7 support.")
+  facebookUrl         String?
+  twitterUrl          String?
+  instagramUrl        String?
+  updatedAt           DateTime @updatedAt
+  taxEnabled          Boolean  @default(false)
+  taxIncludedInPrices Boolean  @default(false)
+  taxRate             Decimal  @default(0.0000) @db.Decimal(5, 4)
+}
+
+model BlogPost {
+  id                 BigInt   @id @default(autoincrement())
+  title              String
+  slug               String   @unique
+  excerpt            String?
+  content            String
+  coverImage         String?
+  isPublished        Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  aiGenerationStatus String?
+  aiModel            String?
+  faqs               Json?
+  focusKeyword       String?
+  generatedByAI      Boolean  @default(false)
+  secondaryKeywords  Json?
+  seoDescription     String?
+  seoScore           Int      @default(0)
+  seoTitle           String?
+  sourceProductId    BigInt?
+  sourceProduct      Product? @relation("ProductToBlog", fields: [sourceProductId], references: [id])
+
+  @@index([slug])
+  @@index([isPublished])
+  @@index([sourceProductId])
+}
+
+model EmailPreference {
+  id                BigInt   @id @default(autoincrement())
+  customerId        BigInt   @unique
+  topics            Json?
+  globalUnsubscribe Boolean  @default(false)
+  isBounced         Boolean  @default(false)
+  isSpamComplaint   Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  customer          Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+model EmailTemplate {
+  id        BigInt       @id @default(autoincrement())
+  name      String       @unique
+  subject   String
+  htmlBody  String
+  textBody  String?
+  channel   EmailChannel @default(TRANSACTIONAL)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  jobs      EmailJob[]
+}
+
+model EmailCampaign {
+  id          BigInt      @id @default(autoincrement())
+  name        String
+  subject     String
+  status      EmailStatus @default(PENDING)
+  scheduledAt DateTime?
+  sentCount   Int         @default(0)
+  failedCount Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  jobs        EmailJob[]
+}
+
+model EmailJob {
+  id             BigInt         @id @default(autoincrement())
+  idempotencyKey String         @unique
+  channel        EmailChannel   @default(TRANSACTIONAL)
+  status         EmailStatus    @default(PENDING)
+  recipientEmail String
+  customerId     BigInt?
+  templateId     BigInt?
+  campaignId     BigInt?
+  payload        Json?
+  attemptCount   Int            @default(0)
+  maxAttempts    Int            @default(3)
+  nextAttemptAt  DateTime?
+  providerMsgId  String?
+  errorLogs      Json?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  sentAt         DateTime?
+  campaign       EmailCampaign? @relation(fields: [campaignId], references: [id])
+  customer       Customer?      @relation(fields: [customerId], references: [id])
+  template       EmailTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([status, nextAttemptAt])
+  @@index([idempotencyKey])
+  @@index([recipientEmail])
+}
+
+model CategoryCircle {
+  id        BigInt   @id @default(autoincrement())
+  name      String
+  image     String
+  url       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum StockStatus {
+  IN_STOCK
+  OUT_OF_STOCK
+  BACKORDER
+}
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+  EXPIRED
+  REFUNDED
+  DELIVERED
 }
 
 enum ContactStatus {
@@ -415,97 +558,6 @@ enum ContactPriority {
   URGENT
 }
 
-model ContactConversation {
-  id               BigInt         @id @default(autoincrement())
-  conversationId   String         @unique @default(cuid())
-  customerId       BigInt?
-  guestName        String?
-  guestEmail       String?
-  guestPhone       String?
-  guestToken       String?        @unique
-  category         String
-  orderId          String?
-  subject          String
-  status           ContactStatus  @default(NEW)
-  priority         ContactPriority @default(NORMAL)
-  assignedAdminId  BigInt?
-  source           String         @default("WEB_FORM")
-  isReadByAdmin    Boolean        @default(false)
-  isReadByCustomer Boolean        @default(true)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  lastReplyAt      DateTime?
-  closedAt         DateTime?
-
-  customer         Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  messages         ContactMessage[]
-
-  @@index([customerId])
-  @@index([guestEmail])
-  @@index([status])
-  @@index([guestToken])
-}
-
-model ContactMessage {
-  id               BigInt         @id @default(autoincrement())
-  conversationId   BigInt
-  senderType       String         // 'CUSTOMER', 'GUEST', or 'ADMIN'
-  senderCustomerId BigInt?
-  senderAdminId    BigInt?
-  body             String
-  attachment       String?
-  createdAt        DateTime       @default(now())
-  readAt           DateTime?
-
-  conversation     ContactConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@index([conversationId])
-}
-
-model StoreSettings {
-  id               Int      @id @default(1)
-  storeName        String   @default("SexToys Lovers")
-  storeDescription String   @default("Your premium destination for the world's best products. Fast shipping, secure payments, and 24/7 support.")
-  facebookUrl      String?
-  twitterUrl       String?
-  instagramUrl     String?
-  taxEnabled          Boolean @default(false)
-  taxIncludedInPrices Boolean @default(false)
-  taxRate             Decimal @db.Decimal(5, 4) @default(0.0000)
-  updatedAt        DateTime @updatedAt
-}
-
-model BlogPost {
-  id              BigInt   @id @default(autoincrement())
-  title           String
-  slug            String   @unique
-  excerpt         String?
-  content         String
-  coverImage      String?
-  isPublished     Boolean  @default(false)
-
-  // AI & SEO Fields
-  seoTitle        String?
-  seoDescription  String?
-  focusKeyword    String?
-  secondaryKeywords Json?
-  faqs            Json?
-  seoScore        Int      @default(0)
-  generatedByAI   Boolean  @default(false)
-  aiGenerationStatus String?
-  aiModel         String?
-  sourceProductId BigInt?
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  sourceProduct   Product? @relation("ProductToBlog", fields: [sourceProductId], references: [id], onDelete: SetNull)
-
-  @@index([slug])
-  @@index([isPublished])
-  @@index([sourceProductId])
-}
-
 enum EmailChannel {
   TRANSACTIONAL
   MARKETING
@@ -521,84 +573,16 @@ enum EmailStatus {
   CANCELLED
 }
 
-model EmailPreference {
-  id              BigInt   @id @default(autoincrement())
-  customerId      BigInt   @unique
-  topics          Json?    // e.g., ["news", "promotions"]
-  globalUnsubscribe Boolean @default(false)
-  isBounced       Boolean  @default(false)
-  isSpamComplaint Boolean  @default(false)
-  updatedAt       DateTime @updatedAt
-  createdAt       DateTime @default(now())
-
-  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-}
-
-model EmailTemplate {
-  id          BigInt       @id @default(autoincrement())
-  name        String       @unique
-  subject     String
-  htmlBody    String
-  textBody    String?
-  channel     EmailChannel @default(TRANSACTIONAL)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  jobs        EmailJob[]
-}
-
-model EmailCampaign {
-  id          BigInt       @id @default(autoincrement())
-  name        String
-  subject     String
-  status      EmailStatus  @default(PENDING)
-  scheduledAt DateTime?
-  sentCount   Int          @default(0)
-  failedCount Int          @default(0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  jobs        EmailJob[]
-}
-
-model EmailJob {
-  id              BigInt       @id @default(autoincrement())
-  idempotencyKey  String       @unique
-  channel         EmailChannel @default(TRANSACTIONAL)
-  status          EmailStatus  @default(PENDING)
-  recipientEmail  String
-  customerId      BigInt?
-  templateId      BigInt?
-  campaignId      BigInt?
-  payload         Json?
-  
-  attemptCount    Int          @default(0)
-  maxAttempts     Int          @default(3)
-  nextAttemptAt   DateTime?
-  
-  providerMsgId   String?
-  errorLogs       Json?
-  
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  sentAt          DateTime?
-
-  customer        Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  template        EmailTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
-  campaign        EmailCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-
-  @@index([status, nextAttemptAt])
-  @@index([idempotencyKey])
-  @@index([recipientEmail])
-}
-
-model CategoryCircle {
+model Notification {
   id        BigInt   @id @default(autoincrement())
-  name      String
-  image     String
-  url       String
-  sortOrder Int      @default(0)
+  customerId    BigInt
+  customer Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  link      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
 
+  @@index([customerId, read])
+}

@@ -6,14 +6,15 @@ import { z } from "zod";
 
 const redisConnection = getRedis();
 
-export const emailQueue = new Queue("emailQueue", {
-  connection: (redisConnection || { host: "localhost", port: 6379, maxRetriesPerRequest: null }) as any,
+export const emailQueue = redisConnection ? new Queue("emailQueue", {
+  connection: redisConnection as any,
   defaultJobOptions: {
     attempts: 3,
     backoff: { type: "exponential", delay: 5000 },
     removeOnComplete: true,
   }
-});
+}) : null;
+
 
 export const QueueEmailSchema = z.object({
   idempotencyKey: z.string().min(1),
@@ -63,12 +64,16 @@ export async function queueEmail(input: QueueEmailInput) {
     return { success: true, message: "Job already queued or processed", jobId: job.id.toString() };
   }
 
-  // Push to BullMQ
-  await emailQueue.add("processEmail", {
-    dbJobId: job.id.toString()
-  }, {
-    jobId: job.idempotencyKey
-  });
+  // Push to BullMQ if Redis is configured
+  if (emailQueue) {
+    await emailQueue.add("processEmail", {
+      dbJobId: job.id.toString()
+    }, {
+      jobId: job.idempotencyKey
+    });
+  } else {
+    console.warn("emailQueue is not initialized. Job saved to DB but will not be processed automatically.");
+  }
 
   return { success: true, jobId: job.id.toString() };
 }

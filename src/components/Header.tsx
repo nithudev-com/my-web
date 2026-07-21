@@ -1,16 +1,19 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AutocompleteSearch } from "./AutocompleteSearch";
 import { MegaMenu } from "./MegaMenu";
 import { useCartContext } from "@/context/CartContext";
+import { useWishlistContext } from "@/context/WishlistContext";
 
 export function Header({ settings, categories = [] }: { settings: any, categories?: any[] }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const cart = useCartContext();
+  const { wishlistIds } = useWishlistContext();
+  const wishlistCount = wishlistIds.size;
 
   const totalCartItems = cart.items.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -27,7 +30,7 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
             <Link prefetch={true} href="/account/orders">Track Order</Link>
             <Link prefetch={true} href="/contact">Help Center</Link>
             <span style={{ marginLeft: '16px', color: '#cbd5e1' }}>|</span>
-            <span style={{ marginLeft: '16px' }}>ENG / USD</span>
+            <span style={{ marginLeft: '16px' }}>ENG / CAD</span>
           </div>
         </div>
 
@@ -50,7 +53,7 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
             <Link prefetch={true} href="/account/wishlist" className="header-action-item">
               <div className="header-action-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                <span className="header-badge">0</span>
+                {wishlistCount > 0 && <span className="header-badge">{wishlistCount}</span>}
               </div>
               <span>Wishlist</span>
             </Link>

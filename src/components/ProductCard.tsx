@@ -104,6 +104,7 @@ export async function ProductCard({
             alt={title}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
+            style={{ objectFit: "contain", mixBlendMode: "multiply" }}
           />
         ) : (
           <div
@@ -181,7 +182,14 @@ export async function ProductCard({
                   </svg>
                 </Link>
               ) : (
-                <AddToCartButton productId={id} outOfStock={isOutOfStock} mini={true} />
+                <AddToCartButton 
+                  productId={id} 
+                  outOfStock={isOutOfStock} 
+                  mini={true} 
+                  title={title}
+                  price={Number(discountPercentage > 0 ? salePrice : price)}
+                  imageUrl={image || undefined}
+                />
               )}
             </div>
           )}

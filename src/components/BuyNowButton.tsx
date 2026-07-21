@@ -9,7 +9,7 @@ export function BuyNowButton({ productId, variantId, outOfStock }: { productId: 
   const router = useRouter();
 
   const handleBuyNow = () => {
-    cart.addItem(productId, 1, variantId);
+    cart.addItem(productId, 1, variantId, undefined, undefined, undefined, true);
     // Push the user directly to the checkout page instead of waiting in the drawer
     router.push('/checkout');
   };

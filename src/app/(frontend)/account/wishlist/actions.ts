@@ -87,3 +87,32 @@ export async function checkWishlistStatus(productId: bigint, variantId: bigint |
 
   return !!item;
 }
+
+export async function getWishlistCount() {
+  const customerId = await getCustomerId();
+  if (!customerId) return 0;
+
+  const wishlist = await prisma.wishlist.findUnique({ where: { customerId } });
+  if (!wishlist) return 0;
+
+  const count = await prisma.wishlistItem.count({
+    where: { wishlistId: wishlist.id }
+  });
+
+  return count;
+}
+
+export async function getWishlistProductIds(): Promise<string[]> {
+  const customerId = await getCustomerId();
+  if (!customerId) return [];
+
+  const wishlist = await prisma.wishlist.findUnique({ where: { customerId } });
+  if (!wishlist) return [];
+
+  const items = await prisma.wishlistItem.findMany({
+    where: { wishlistId: wishlist.id },
+    select: { productId: true }
+  });
+
+  return items.map(item => item.productId.toString());
+}

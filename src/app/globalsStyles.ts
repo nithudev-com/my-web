@@ -2396,7 +2396,7 @@ img {
 .premium-card-image-link {
   display: block;
   position: relative;
-  aspect-ratio: 4 / 4;
+  padding-bottom: 100%;
   background: #f8fafc; /* Very light gray */
   overflow: hidden;
 }

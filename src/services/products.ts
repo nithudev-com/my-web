@@ -99,74 +99,82 @@ export async function getCategoryProducts(slug: string, page = 1, limit = 24) {
 }
 
 export async function getFilteredProducts(params: { slug?: string, brandSlug?: string, search?: string, sort?: string, minPrice?: number, maxPrice?: number, page?: number, limit?: number }) {
-  const page = params.page || 1;
-  const limit = params.limit || 24;
-  const skip = Math.max(page - 1, 0) * limit;
+  const cacheKey = `filtered-products-${JSON.stringify(params)}`;
+  
+  return unstable_cache(
+    async () => {
+      const page = params.page || 1;
+      const limit = params.limit || 24;
+      const skip = Math.max(page - 1, 0) * limit;
 
-  let whereClause: any = { status: "ACTIVE" };
+      let whereClause: any = { status: "ACTIVE" };
 
-  if (params.slug) {
-    const decodedCategorySlug = decodeURIComponent(params.slug);
-    const category = await prisma.category.findUnique({ where: { slug: decodedCategorySlug } });
-    if (category) {
-      whereClause.categoryId = category.id;
-    } else {
-      return { products: [], total: 0, category: null, brand: null };
-    }
-  }
+      if (params.slug) {
+        const decodedCategorySlug = decodeURIComponent(params.slug);
+        const category = await prisma.category.findUnique({ where: { slug: decodedCategorySlug } });
+        if (category) {
+          whereClause.categoryId = category.id;
+        } else {
+          return { products: [], total: 0, category: null, brand: null };
+        }
+      }
 
-  if (params.brandSlug) {
-    const decodedBrandSlug = decodeURIComponent(params.brandSlug);
-    const brand = await prisma.brand.findUnique({ where: { slug: decodedBrandSlug } });
-    if (brand) {
-      whereClause.brandId = brand.id;
-    } else {
-      return { products: [], total: 0, category: null, brand: null };
-    }
-  }
+      if (params.brandSlug) {
+        const decodedBrandSlug = decodeURIComponent(params.brandSlug);
+        const brand = await prisma.brand.findUnique({ where: { slug: decodedBrandSlug } });
+        if (brand) {
+          whereClause.brandId = brand.id;
+        } else {
+          return { products: [], total: 0, category: null, brand: null };
+        }
+      }
 
-  if (params.search) {
-    whereClause.OR = [
-      { title: { contains: params.search, mode: 'insensitive' } },
-      { description: { contains: params.search, mode: 'insensitive' } }
-    ];
-  }
+      if (params.search) {
+        whereClause.OR = [
+          { title: { contains: params.search, mode: 'insensitive' } },
+          { description: { contains: params.search, mode: 'insensitive' } }
+        ];
+      }
 
-  if (params.minPrice !== undefined || params.maxPrice !== undefined) {
-    whereClause.basePrice = {};
-    if (params.minPrice !== undefined) whereClause.basePrice.gte = params.minPrice;
-    if (params.maxPrice !== undefined) whereClause.basePrice.lte = params.maxPrice;
-  }
+      if (params.minPrice !== undefined || params.maxPrice !== undefined) {
+        whereClause.basePrice = {};
+        if (params.minPrice !== undefined) whereClause.basePrice.gte = params.minPrice;
+        if (params.maxPrice !== undefined) whereClause.basePrice.lte = params.maxPrice;
+      }
 
-  let orderBy: any = { updatedAt: "desc" };
-  if (params.sort === 'price_asc') orderBy = { basePrice: "asc" };
-  if (params.sort === 'price_desc') orderBy = { basePrice: "desc" };
-  if (params.sort === 'newest') orderBy = { createdAt: "desc" };
+      let orderBy: any = { updatedAt: "desc" };
+      if (params.sort === 'price_asc') orderBy = { basePrice: "asc" };
+      if (params.sort === 'price_desc') orderBy = { basePrice: "desc" };
+      if (params.sort === 'newest') orderBy = { createdAt: "desc" };
 
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
-      where: whereClause,
-      select: productListSelect,
-      orderBy,
-      skip,
-      take: limit
-    }),
-    prisma.product.count({ where: whereClause })
-  ]);
+      const [products, total] = await Promise.all([
+        prisma.product.findMany({
+          where: whereClause,
+          select: productListSelect,
+          orderBy,
+          skip,
+          take: limit
+        }),
+        prisma.product.count({ where: whereClause })
+      ]);
 
-  let category = null;
-  if (params.slug) {
-    const decodedCategorySlug = decodeURIComponent(params.slug);
-    category = await prisma.category.findUnique({ where: { slug: decodedCategorySlug } });
-  }
+      let category = null;
+      if (params.slug) {
+        const decodedCategorySlug = decodeURIComponent(params.slug);
+        category = await prisma.category.findUnique({ where: { slug: decodedCategorySlug } });
+      }
 
-  let brand = null;
-  if (params.brandSlug) {
-    const decodedBrandSlug = decodeURIComponent(params.brandSlug);
-    brand = await prisma.brand.findUnique({ where: { slug: decodedBrandSlug } });
-  }
+      let brand = null;
+      if (params.brandSlug) {
+        const decodedBrandSlug = decodeURIComponent(params.brandSlug);
+        brand = await prisma.brand.findUnique({ where: { slug: decodedBrandSlug } });
+      }
 
-  return sanitizePrismaData({ products, total, category, brand });
+      return sanitizePrismaData({ products, total, category, brand });
+    },
+    [cacheKey],
+    { revalidate: 1800, tags: ["filtered-products", "products"] }
+  )();
 }
 
 export async function getTopProductSlugs(limit = 1000) {

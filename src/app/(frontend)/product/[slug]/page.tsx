@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { formatPrice } from "@/lib/money";
 import { productJsonLd, siteUrl, faqJsonLd, breadcrumbJsonLd } from "@/lib/seo";
@@ -20,7 +21,7 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return getTopProductSlugs(50);
+  return [];
 }
 
 function parseFaqs(raw: any): { question: string; answer: string }[] {
@@ -98,23 +99,32 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   if (!product) notFound();
 
-  // Related Products Query
-  const relatedProducts = product.categoryId ? await prisma.product.findMany({
-    where: { categoryId: product.categoryId, id: { not: product.id }, status: 'ACTIVE' },
-    take: 4,
-    select: { 
-      id: true, 
-      title: true, 
-      slug: true, 
-      mainImage: true, 
-      basePrice: true, 
-      salePrice: true,
-      stockQuantity: true,
-      category: { select: { name: true } },
-      brand: { select: { name: true } },
-      _count: { select: { variants: true } }
-    }
-  }) : [];
+  // Related Products Query (Cached)
+  const getRelatedProducts = unstable_cache(
+    async (categoryId: bigint | null, excludeId: bigint) => {
+      if (!categoryId) return [];
+      return prisma.product.findMany({
+        where: { categoryId: categoryId, id: { not: excludeId }, status: 'ACTIVE' },
+        take: 4,
+        select: { 
+          id: true, 
+          title: true, 
+          slug: true, 
+          mainImage: true, 
+          basePrice: true, 
+          salePrice: true,
+          stockQuantity: true,
+          category: { select: { name: true } },
+          brand: { select: { name: true } },
+          _count: { select: { variants: true } }
+        }
+      }).then(data => JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v)));
+    },
+    [`related-products-${product.categoryId?.toString()}-${product.id.toString()}`],
+    { revalidate: 3600, tags: ['products'] }
+  );
+
+  const relatedProducts = await getRelatedProducts(product.categoryId, product.id);
 
   const faqs = parseFaqs(product.faq);
   const faqSchema = faqs.length > 0 ? faqJsonLd(faqs, siteUrl(`/product/${product.slug}`)) : null;
@@ -418,7 +428,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <div style={{ marginTop: '48px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
           <h2 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '24px', color: '#0f172a' }}>You May Also Like</h2>
           <div className="related-products-grid">
-            {relatedProducts.map((rp) => (
+            {relatedProducts.map((rp: any) => (
               <ProductCard
                 key={rp.id.toString()}
                 id={rp.id.toString()}

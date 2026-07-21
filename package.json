@@ -29,6 +29,7 @@
     "meilisearch": "latest",
     "next": "^15.5.19",
     "nodemailer": "^9.0.3",
+    "playwright": "^1.61.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hot-toast": "^2.6.0",

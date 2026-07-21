@@ -217,8 +217,9 @@ export function HeroBanner() {
           width: 100%;
           max-width: 420px;
           height: auto;
-          object-fit: contain;
-          filter: drop-shadow(0 30px 40px rgba(0,0,0,0.6));
+          object-fit: cover;
+          border-radius: 24px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 4px rgba(255,255,255,0.1);
           animation: floatSlow 6s ease-in-out infinite;
           z-index: 5;
         }
@@ -258,9 +259,9 @@ export function HeroBanner() {
             </div>
           </div>
 
-          <h1 className="sale-title">
-            Save Up To 90%<br />
-            RRP In Our Sample Sale!
+          <h1 className="sale-title" style={{ fontSize: 'clamp(32px, 5vw, 64px)' }}>
+            Save 60% On Beautiful<br />
+            Remote Vibrators
           </h1>
           
           <div className="sale-footer-row">
@@ -282,8 +283,8 @@ export function HeroBanner() {
         {/* Right Side: Visual */}
         <div className="sale-visual-container">
           <Image 
-            src="/heart-device.png" 
-            alt="Premium Vibrator Heart" 
+            src="/remote-vibrator.png" 
+            alt="Beautiful Remote Vibrator" 
             width={600}
             height={600}
             className="sale-product-img"

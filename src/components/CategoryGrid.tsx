@@ -5,14 +5,14 @@ import React from "react";
 import Image from "next/image";
 
 const ACCENT_COLORS = [
-  '#ff2d55', // Sale / Pink
-  '#da52ff', // Vibrators / Magenta
-  '#ff9500', // Sex Toys / Orange
-  '#5ac8fa', // Lubes / Cyan
-  '#ffcc00', // Couples / Yellow
-  '#4cd964', // Male / Green
-  '#ff5e3a', // Bondage / Dark Orange
-  '#ff2d55', // Lingerie / Pink
+  '#f43f5e', // Pink/Red
+  '#84cc16', // Lime Green
+  '#ec4899', // Pink
+  '#f59e0b', // Yellow/Orange
+  '#10b981', // Green
+  '#f97316', // Orange
+  '#8b5cf6', // Purple
+  '#0ea5e9', // Blue
 ];
 
 export function CategoryGrid({ categories }: { categories: any[] }) {
@@ -21,42 +21,52 @@ export function CategoryGrid({ categories }: { categories: any[] }) {
   return (
     <div className="category-showcase-section">
       <div className="container">
-        <div className="category-showcase-grid">
-          {categories.map((category, index) => {
-            const circleColor = ACCENT_COLORS[index % ACCENT_COLORS.length];
-            return (
-              <Link 
-                key={category.id} 
-                href={`/category/${category.slug}`} 
-                prefetch={true}
-                className="category-showcase-card"
-              >
-                <span className="category-showcase-name">{category.name}</span>
-                
-                <div className="category-showcase-backdrop-wrapper">
-                  <div 
-                    className="category-showcase-circle" 
-                    style={{ backgroundColor: circleColor }}
-                  />
-                  <div className="category-showcase-img-container">
-                    {category.image && category.image.startsWith('http') ? (
-                      <Image 
-                        src={category.image} 
-                        alt={category.seoTitle || category.name} 
-                        className="category-showcase-img"
-                        fill
-                        sizes="120px"
-                      />
-                    ) : (
-                      <span className="category-showcase-placeholder">
-                        {category.image || '🏷️'}
-                      </span>
-                    )}
+        <div className="category-showcase-wrapper">
+          <h2 className="category-showcase-title">Shop by Category</h2>
+          <div className="category-showcase-grid">
+            {categories.map((category, index) => {
+              const circleColor = ACCENT_COLORS[index % ACCENT_COLORS.length];
+              return (
+                <Link 
+                  key={category.id} 
+                  href={`/category/${category.slug}`} 
+                  prefetch={true}
+                  className="category-showcase-card"
+                >
+                  <span className="category-showcase-name">{category.name}</span>
+                  
+                  <div className="category-showcase-backdrop-wrapper">
+                    <div 
+                      className="category-showcase-circle" 
+                      style={{ backgroundColor: circleColor }}
+                    />
+                    <div className="category-showcase-img-container">
+                      {category.image ? (
+                        <Image 
+                          src={category.image} 
+                          alt={category.seoTitle || category.name} 
+                          className="category-showcase-img"
+                          fill
+                          sizes="100px"
+                          style={{ objectFit: "contain", mixBlendMode: "multiply" }}
+                        />
+                      ) : (
+                        <span className="category-showcase-placeholder">
+                          🏷️
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
+                </Link>
+              );
+            })}
+          </div>
+          
+          <div className="category-showcase-footer">
+            <Link href="/category" className="category-showcase-explore">
+              Explore More
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -66,23 +76,28 @@ export function CategoryGrid({ categories }: { categories: any[] }) {
           background: #ffffff;
         }
 
+        .category-showcase-wrapper {
+          background: #ffffff;
+          border-radius: 24px;
+          overflow: hidden;
+          padding-top: 24px;
+          padding-bottom: 8px;
+        }
+
         .category-showcase-title {
-          font-size: 28px;
-          font-weight: 900;
-          color: #111111;
-          margin-bottom: 28px;
-          letter-spacing: -0.02em;
-          text-transform: uppercase;
+          font-size: 22px;
+          font-weight: 800;
+          color: #4c1d95; /* Deep Purple */
+          text-align: center;
+          margin-bottom: 20px;
+          margin-top: 0;
         }
 
         .category-showcase-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 2px;
-          background: #e5e7eb;
-          border: 2px solid #e5e7eb;
-          border-radius: 16px;
-          overflow: hidden;
+          gap: 3px; /* Creates the white lines */
+          background: #ffffff;
         }
 
         @media (max-width: 1024px) {
@@ -94,36 +109,34 @@ export function CategoryGrid({ categories }: { categories: any[] }) {
         @media (max-width: 600px) {
           .category-showcase-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            background: transparent;
-            border: none;
-            padding: 0 4px;
+            gap: 3px;
+            background: #ffffff;
           }
+          
           .category-showcase-card {
-            height: 110px;
-            padding: 0 0 0 12px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            height: 100px !important;
+            padding: 0 0 0 16px !important;
           }
+          
           .category-showcase-name {
-            font-size: 13px;
-            max-width: 55%;
-            line-height: 1.2;
-            word-wrap: break-word;
+            font-size: 14px !important;
+            max-width: 50% !important;
           }
+
           .category-showcase-backdrop-wrapper {
-            width: 80px;
+            width: 70px !important;
           }
+
           .category-showcase-circle {
-            width: 90px;
-            height: 90px;
-            right: -25px;
+            width: 90px !important;
+            height: 90px !important;
+            right: -25px !important;
           }
+
           .category-showcase-img-container {
-            width: 60px;
-            height: 60px;
-            padding: 6px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            width: 50px !important;
+            height: 50px !important;
+            right: 0 !important;
           }
         }
 
@@ -131,40 +144,35 @@ export function CategoryGrid({ categories }: { categories: any[] }) {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          background: #f3f4f6;
-          height: 130px;
+          background: #f4f4f5; /* Light gray cell background */
+          height: 120px;
           padding: 0 0 0 24px;
           position: relative;
           text-decoration: none;
           overflow: hidden;
-          transition: all 0.25s ease;
+          transition: background 0.2s ease;
         }
 
         .category-showcase-card:hover {
-          background: #eaecef;
+          background: #e4e4e7;
         }
 
         .category-showcase-name {
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 800;
-          color: #111827;
+          color: #18181b; /* Dark text */
           z-index: 2;
-          max-width: 55%;
-          line-height: 1.3;
-          transition: transform 0.25s ease;
-        }
-
-        .category-showcase-card:hover .category-showcase-name {
-          transform: translateX(4px);
+          max-width: 50%;
+          line-height: 1.2;
         }
 
         .category-showcase-backdrop-wrapper {
           position: relative;
           height: 100%;
-          width: 140px;
+          width: 100px;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-end;
           flex-shrink: 0;
           z-index: 2;
         }
@@ -172,47 +180,49 @@ export function CategoryGrid({ categories }: { categories: any[] }) {
         .category-showcase-circle {
           position: absolute;
           right: -30px;
-          width: 140px;
-          height: 140px;
+          width: 120px;
+          height: 120px;
           border-radius: 50%;
           z-index: 1;
-          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .category-showcase-card:hover .category-showcase-circle {
-          transform: scale(1.1);
         }
 
         .category-showcase-img-container {
           position: relative;
-          width: 90px;
-          height: 90px;
-          background: #ffffff;
-          border: 1px solid rgba(0, 0, 0, 0.05);
-          border-radius: 12px;
-          padding: 6px;
+          width: 60px;
+          height: 60px;
+          z-index: 2;
+          right: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 2;
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .category-showcase-card:hover .category-showcase-img-container {
-          transform: scale(1.08) rotate(2deg);
-          box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
         }
 
         .category-showcase-img {
           width: 100%;
           height: 100%;
           object-fit: contain;
-          border-radius: 6px;
+          filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
         }
 
         .category-showcase-placeholder {
           font-size: 32px;
+        }
+
+        .category-showcase-footer {
+          text-align: center;
+          padding: 24px 0 12px 0;
+          background: #ffffff;
+        }
+
+        .category-showcase-explore {
+          font-size: 16px;
+          font-weight: 800;
+          color: #4c1d95;
+          text-decoration: none;
+        }
+        
+        .category-showcase-explore:hover {
+          text-decoration: underline;
         }
       `}</style>
     </div>

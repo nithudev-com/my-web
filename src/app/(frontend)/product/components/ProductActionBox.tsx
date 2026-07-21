@@ -7,7 +7,7 @@ import { WishlistButton } from './WishlistButton';
 // Fallback simple formatter since formatPrice is async in this project
 function formatMoney(amount: string | number) {
   const num = Number(amount);
-  const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+  const formatted = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(num);
   return `${formatted} CAD`;
 }
 
@@ -206,6 +206,9 @@ export function ProductActionBox({
           productId={product.id.toString()} 
           variantId={selectedVariantId || undefined} 
           outOfStock={currentStock <= 0} 
+          title={selectedVariant ? (selectedVariant.title || product.title) : product.title}
+          price={currentSalePrice || currentPrice}
+          imageUrl={selectedVariant?.image || product.mainImage || undefined}
         />
         <BuyNowButton 
           productId={product.id.toString()} 

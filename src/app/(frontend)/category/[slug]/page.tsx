@@ -5,10 +5,13 @@ import { categoryJsonLd, siteUrl } from "@/lib/seo";
 import { getFilteredProducts } from "@/services/products";
 import { ProductFilters } from "@/components/ProductFilters";
 import { prisma } from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
 import Link from "next/link";
+import { getSitemapCategories } from "@/services/products";
 
 export const revalidate = 1800;
 export const dynamicParams = true;
+
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -37,28 +40,38 @@ export default async function CategoryPage({ params, searchParams }: { params: P
 
   if (!category) notFound();
 
-  // Fetch subcategories and batch review stats in parallel
   const productIds = (products || []).map((p) => BigInt(p.id.toString()));
-  const [subcategories, reviewStats] = await Promise.all([
-    prisma.category.findMany({
-      where: { parentId: category.id },
-      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-      select: { id: true, name: true, slug: true, image: true }
-    }),
-    productIds.length > 0
-      ? prisma.review.groupBy({
-          by: ['productId'],
-          where: { productId: { in: productIds }, approved: true },
-          _avg: { rating: true },
-          _count: { rating: true },
-        })
-      : Promise.resolve([]),
-  ]);
+  const getCategoryPageData = unstable_cache(
+    async (categoryId: bigint, productIdsString: string) => {
+      const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
+      const [subcategories, reviewStats] = await Promise.all([
+        prisma.category.findMany({
+          where: { parentId: categoryId },
+          orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+          select: { id: true, name: true, slug: true, image: true }
+        }),
+        ids.length > 0
+          ? prisma.review.groupBy({
+              by: ['productId'],
+              where: { productId: { in: ids }, approved: true },
+              _avg: { rating: true },
+              _count: { rating: true },
+            })
+          : Promise.resolve([]),
+      ]);
+      const serialize = (obj: any) => JSON.parse(JSON.stringify(obj, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+      return serialize({ subcategories, reviewStats });
+    },
+    [`category-data-${category.id.toString()}-${productIds.join(',')}`],
+    { revalidate: 1800, tags: ['categories', 'reviews'] }
+  );
 
-  const reviewMap = new Map(
-    reviewStats.map((r) => [
+  const { subcategories, reviewStats } = await getCategoryPageData(category.id, productIds.join(','));
+
+  const reviewMap = new Map<string, any>(
+    reviewStats.map((r: any) => [
       r.productId.toString(),
-      { avg: Number(r._avg.rating ?? 0), count: r._count.rating },
+      { avg: Number(r._avg?.rating ?? 0), count: r._count?.rating ?? 0 },
     ])
   );
 
@@ -128,7 +141,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
 
       {subcategories.length > 0 && (
         <div className="category-showcase-grid">
-          {subcategories.map(subcat => (
+          {subcategories.map((subcat: any) => (
             <Link key={subcat.id.toString()} href={`/category/${subcat.slug}`} className="category-showcase-item">
               <div className="category-showcase-image-wrapper">
                 {subcat.image ? (

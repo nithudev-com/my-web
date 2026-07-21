@@ -1,18 +1,14 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useTransition } from 'react';
 import Link from 'next/link';
+import { NotificationData, markNotificationsAsRead } from '../notifications-actions';
 
-const MOCK_NOTIFICATIONS = [
-  { id: 1, title: 'Order Shipped!', message: 'Your order #ORD-8821 has been shipped and is on its way.', date: '2 hours ago', read: false },
-  { id: 2, title: 'Welcome to Monirize', message: 'Thanks for creating an account. Enjoy premium shopping!', date: '2 days ago', read: false },
-  { id: 3, title: 'Price Drop Alert', message: 'An item on your wishlist is now on sale.', date: '1 week ago', read: true },
-];
-
-export function NotificationBell() {
+export function NotificationBell({ initialNotifications }: { initialNotifications: NotificationData[] }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState(initialNotifications);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [isPending, startTransition] = useTransition();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -27,7 +23,13 @@ export function NotificationBell() {
   }, []);
 
   const markAllRead = () => {
+    // Optimistic UI update
     setNotifications(notifications.map(n => ({ ...n, read: true })));
+    
+    // Background server call
+    startTransition(() => {
+      markNotificationsAsRead();
+    });
   };
 
   return (

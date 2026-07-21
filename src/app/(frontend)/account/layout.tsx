@@ -1,7 +1,10 @@
 import { CustomerNavigation } from './components/CustomerNavigation';
 import { NotificationBell } from './components/NotificationBell';
+import { getNotifications } from './notifications-actions';
 
-export default function AccountLayout({ children }: { children: React.ReactNode }) {
+export default async function AccountLayout({ children }: { children: React.ReactNode }) {
+  const notifications = await getNotifications();
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FFF4F7', fontFamily: 'inherit' }}>
       {/* Compact Top Header */}
@@ -11,7 +14,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
             <span style={{ fontSize: '20px', fontWeight: '900', color: '#730C63', letterSpacing: '-0.02em' }}>Dashboard</span>
           </div>
           <div>
-            <NotificationBell />
+            <NotificationBell initialNotifications={notifications} />
           </div>
         </div>
       </header>

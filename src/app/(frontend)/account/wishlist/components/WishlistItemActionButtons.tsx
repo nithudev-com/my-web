@@ -16,8 +16,15 @@ export function WishlistItemActionButtons({ itemId, productId, isAvailable }: { 
 
   const handleRemove = async () => {
     setRemoving(true);
-    await removeFromWishlist(BigInt(itemId));
-    // It will revalidate and remove itself from the server render
+    // Optimistic dispatch
+    window.dispatchEvent(new CustomEvent('wishlistUpdated', { detail: { action: 'removed' } }));
+    
+    const result = await removeFromWishlist(BigInt(itemId));
+    if (!result.success) {
+      // Revert dispatch on failure
+      window.dispatchEvent(new CustomEvent('wishlistUpdated', { detail: { action: 'added' } }));
+      setRemoving(false);
+    }
   };
 
   return (

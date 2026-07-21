@@ -17,7 +17,7 @@ type CartContextType = {
   isCartOpen: boolean;
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   removeItem: (productId: string, variantId?: string) => void;
-  addItem: (productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string) => void;
+  addItem: (productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string, skipOpenCart?: boolean) => void;
   clearCart: () => void;
   syncItems: (items: CartItemInput[]) => void;
   openCart: () => void;
@@ -80,7 +80,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     saveCart(newItems);
   };
 
-  const addItem = (productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string) => {
+  const addItem = (productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string, skipOpenCart?: boolean) => {
     const existingIndex = items.findIndex(item => item.productId === productId && item.variantId === variantId);
     if (existingIndex >= 0) {
       const newItems = [...items];
@@ -93,7 +93,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       saveCart([...items, { productId, variantId, quantity, title, price, imageUrl }]);
     }
-    setIsCartOpen(true); // Automatically open the slide-out cart when adding
+    if (!skipOpenCart) {
+      setIsCartOpen(true); // Automatically open the slide-out cart when adding
+    }
   };
 
   const clearCart = () => {

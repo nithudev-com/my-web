@@ -28,6 +28,8 @@ function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '']);
   const [otpSent, setOtpSent] = useState(false);
+  const [resendCount, setResendCount] = useState(0);
+  const [resendCooldown, setResendCooldown] = useState(0);
   
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,6 +49,14 @@ function RegisterForm() {
       setPasswordMatch(null);
     }
   }, [password, confirmPassword]);
+
+  // Resend OTP Cooldown Timer
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const sendOtp = async () => {
     setLoading(true);
@@ -68,6 +78,12 @@ function RegisterForm() {
     if (res.success) {
       setOtpSent(true);
       setStep(4);
+      
+      let time = 30;
+      if (resendCount === 1) time = 60;
+      else if (resendCount >= 2) time = 120;
+      setResendCooldown(time);
+      setResendCount(c => c + 1);
     } else {
       setError(res.error || 'Failed to send OTP.');
     }
@@ -129,6 +145,23 @@ function RegisterForm() {
       const prevInput = document.getElementById(`otp-${index - 1}`);
       if (prevInput) prevInput.focus();
     }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+    if (!pastedData) return;
+    
+    const newOtp = [...otp];
+    for (let i = 0; i < pastedData.length; i++) {
+      newOtp[i] = pastedData[i];
+    }
+    setOtp(newOtp);
+    
+    // Auto-focus the next input after pasted digits (or the last one)
+    const nextIndex = Math.min(pastedData.length, 3);
+    const nextInput = document.getElementById(`otp-${nextIndex}`);
+    if (nextInput) nextInput.focus();
   };
 
   return (
@@ -297,6 +330,7 @@ function RegisterForm() {
               value={digit}
               onChange={(e) => handleOtpChange(index, e.target.value)}
               onKeyDown={(e) => handleOtpKeyDown(index, e)}
+              onPaste={handleOtpPaste}
               style={{
                 width: '45px', height: '55px', fontSize: '24px', fontWeight: '800', textAlign: 'center',
                 border: digit ? '2px solid var(--brand-primary)' : '2px solid var(--border)',
@@ -312,6 +346,27 @@ function RegisterForm() {
             {error}
           </div>
         )}
+
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <button 
+            type="button" 
+            onClick={sendOtp} 
+            disabled={resendCooldown > 0 || loading}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: resendCooldown > 0 ? 'var(--muted)' : 'var(--brand-primary)', 
+              fontWeight: '600', 
+              fontSize: '14px', 
+              cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
+              textDecoration: resendCooldown > 0 ? 'none' : 'underline'
+            }}
+          >
+            {resendCooldown > 0 
+              ? `Resend OTP in ${resendCooldown}s` 
+              : 'Resend OTP'}
+          </button>
+        </div>
 
         <div style={{ display: 'flex', gap: '12px' }}>
           <button type="button" onClick={prevStep} className="auth-button" style={{ background: '#fff', color: 'var(--brand-black)', border: '2px solid var(--border)', flex: 1 }}>Edit Info</button>

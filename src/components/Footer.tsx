@@ -63,7 +63,7 @@ export function Footer({ settings }: { settings: any }) {
             <ul className="footer-links-list">
               <li><Link prefetch={true} href="/category/vibrators">Vibrators</Link></li>
               <li><Link prefetch={true} href="/category/dongs-and-dildos">Dildos & Dongs</Link></li>
-              <li><Link prefetch={true} href="/category/anal-toys">Anal Toys</Link></li>
+              <li><Link prefetch={true} href="/category/cock-rings">Cock Rings</Link></li>
               <li><Link prefetch={true} href="/category/lubes-and-lotions">Lubes & Lotions</Link></li>
               <li><Link prefetch={true} href="/category/bdsm">BDSM & Bondage</Link></li>
             </ul>

@@ -12,7 +12,17 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   typedRoutes: false,
-  productionBrowserSourceMaps: true
+  productionBrowserSourceMaps: true,
+  output: 'standalone',
+  staticPageGenerationTimeout: 300,
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    }
+  }
 };
 
 export default nextConfig;

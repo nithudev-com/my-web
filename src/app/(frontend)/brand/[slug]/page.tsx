@@ -12,6 +12,7 @@ import { ProductFilters } from "@/components/ProductFilters";
 export const revalidate = 1800;
 export const dynamicParams = true;
 
+
 // Helper to get store name safely
 async function getStoreName() {
   try {
