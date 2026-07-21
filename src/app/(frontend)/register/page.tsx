@@ -26,7 +26,7 @@ function RegisterForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [resendCount, setResendCount] = useState(0);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -77,7 +77,7 @@ function RegisterForm() {
     
     if (res.success) {
       setOtpSent(true);
-      setStep(4);
+      setStep(3);
       
       let time = 30;
       if (resendCount === 1) time = 60;
@@ -97,7 +97,7 @@ function RegisterForm() {
       return;
     }
 
-    if (otp.join('').length !== 4) {
+    if (otp.length !== 4) {
       setError('Please enter the valid 4-digit OTP.');
       return;
     }
@@ -108,7 +108,10 @@ function RegisterForm() {
     // If e is a form event, get formData, else we must construct it from state/DOM
     const formElement = document.getElementById('registerForm') as HTMLFormElement;
     const formData = new FormData(formElement);
-    formData.append('otp', otp.join(''));
+    formData.append('otp', otp);
+    // Append implicit consents
+    formData.append('acceptTerms', 'on');
+    formData.append('ageConfirmed', 'on');
     
     const result = await customerRegister(formData);
 
@@ -122,54 +125,15 @@ function RegisterForm() {
     }
   };
 
-  const nextStep = () => setStep(s => Math.min(s + 1, 4));
+  const nextStep = () => setStep(s => Math.min(s + 1, 3));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) value = value[value.length - 1]; // Only 1 char
-    if (!/^\d*$/.test(value)) return; // Only numbers
-    
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next
-    if (value && index < 3) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      if (nextInput) nextInput.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      if (prevInput) prevInput.focus();
-    }
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
-    if (!pastedData) return;
-    
-    const newOtp = [...otp];
-    for (let i = 0; i < pastedData.length; i++) {
-      newOtp[i] = pastedData[i];
-    }
-    setOtp(newOtp);
-    
-    // Auto-focus the next input after pasted digits (or the last one)
-    const nextIndex = Math.min(pastedData.length, 3);
-    const nextInput = document.getElementById(`otp-${nextIndex}`);
-    if (nextInput) nextInput.focus();
-  };
-
   return (
-    <form id="registerForm" onSubmit={(e) => { e.preventDefault(); if (step === 4) handleSubmit(e); }} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <form id="registerForm" onSubmit={(e) => { e.preventDefault(); if (step === 3) handleSubmit(e); }} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
       {/* Progress Indicator */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-        {[1, 2, 3, 4].map(i => (
+        {[1, 2, 3].map(i => (
           <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
             <div style={{ 
               width: '28px', height: '28px', borderRadius: '50%', 
@@ -183,13 +147,13 @@ function RegisterForm() {
               {i}
             </div>
             <div style={{ fontSize: '11px', fontWeight: '700', color: step >= i ? 'var(--brand-primary)' : 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {i === 1 ? 'Details' : i === 2 ? 'Security' : i === 3 ? 'Legal' : 'Verify'}
+              {i === 1 ? 'Details' : i === 2 ? 'Security' : 'Verify'}
             </div>
           </div>
         ))}
       </div>
-      <div style={{ height: '2px', background: 'var(--border)', marginTop: '-34px', marginBottom: '32px', position: 'relative', zIndex: -1, width: 'calc(100% - 25%)', marginLeft: '12.5%' }}>
-        <div style={{ height: '100%', background: 'var(--brand-primary)', width: (((step - 1) / 3) * 100) + '%', transition: 'all 0.3s ease' }}></div>
+      <div style={{ height: '2px', background: 'var(--border)', marginTop: '-34px', marginBottom: '32px', position: 'relative', zIndex: -1, width: 'calc(100% - 33.33%)', marginLeft: '16.66%' }}>
+        <div style={{ height: '100%', background: 'var(--brand-primary)', width: (((step - 1) / 2) * 100) + '%', transition: 'all 0.3s ease' }}></div>
       </div>
 
       {/* Step 1: Personal Info */}
@@ -254,46 +218,8 @@ function RegisterForm() {
           {passwordMatch === false && <p style={{ color: '#ef4444', fontSize: '13px', marginTop: '8px', fontWeight: '600' }}>Passwords do not match</p>}
           {passwordMatch === true && <p style={{ color: '#10b981', fontSize: '13px', marginTop: '8px', fontWeight: '600' }}>Passwords match!</p>}
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button type="button" onClick={prevStep} className="auth-button" style={{ background: 'var(--muted)', flex: 1 }}>Back</button>
-          <button type="button" onClick={nextStep} className="auth-button" style={{ flex: 2 }} disabled={!password || passwordMatch === false}>Continue</button>
-        </div>
-      </div>
-
-      {/* Step 3: Consent */}
-      <div style={{ display: step === 3 ? 'block' : 'none' }}>
         
-        <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '700', margin: '0 0 12px 0', color: 'var(--brand-black)' }}>Legal & Verification</h3>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Age Confirmation */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <input type="checkbox" id="ageConfirmed" name="ageConfirmed" required={step === 3} style={{ width: '20px', height: '20px', accentColor: 'var(--brand-primary)', cursor: 'pointer', marginTop: '2px' }} />
-              <label htmlFor="ageConfirmed" style={{ fontSize: '14px', color: 'var(--brand-black)', lineHeight: '1.5', fontWeight: '500' }}>
-                I confirm that I meet the <strong>minimum legal age</strong> required to purchase adult products in my jurisdiction. *
-              </label>
-            </div>
-
-            {/* Terms */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <input type="checkbox" id="acceptTerms" name="acceptTerms" required={step === 3} style={{ width: '20px', height: '20px', accentColor: 'var(--brand-primary)', cursor: 'pointer', marginTop: '2px' }} />
-              <label htmlFor="acceptTerms" style={{ fontSize: '14px', color: 'var(--brand-black)', lineHeight: '1.5' }}>
-                I agree to the <Link href="/terms" style={{ color: 'var(--brand-primary)', fontWeight: '600' }}>Terms of Service</Link> and <Link href="/privacy" style={{ color: 'var(--brand-primary)', fontWeight: '600' }}>Privacy Policy</Link>. *
-              </label>
-            </div>
-
-            {/* Marketing */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
-              <input type="checkbox" id="marketingConsent" name="marketingConsent" style={{ width: '20px', height: '20px', accentColor: 'var(--brand-primary)', cursor: 'pointer', marginTop: '2px' }} />
-              <label htmlFor="marketingConsent" style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: '1.5' }}>
-                Send me discreet emails about exclusive offers and new arrivals. (Optional)
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {error && step === 3 && (
+        {error && step === 2 && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px', borderRadius: '8px', color: '#ef4444', fontSize: '14px', marginBottom: '20px' }}>
             {error}
           </div>
@@ -301,14 +227,14 @@ function RegisterForm() {
 
         <div style={{ display: 'flex', gap: '12px' }}>
           <button type="button" onClick={prevStep} className="auth-button" style={{ background: 'var(--muted)', flex: 1 }}>Back</button>
-          <button type="button" onClick={sendOtp} className="auth-button" disabled={loading} style={{ flex: 2 }}>
-            {loading ? 'Sending OTP...' : 'Send OTP Code'}
+          <button type="button" onClick={sendOtp} className="auth-button" disabled={!password || passwordMatch === false || loading} style={{ flex: 2 }}>
+            {loading ? 'Sending OTP...' : 'Send OTP & Continue'}
           </button>
         </div>
       </div>
 
-      {/* Step 4: OTP Verification */}
-      <div style={{ display: step === 4 ? 'block' : 'none' }}>
+      {/* Step 3: OTP Verification */}
+      <div style={{ display: step === 3 ? 'block' : 'none' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fdf2f8', color: '#D63062', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -319,29 +245,26 @@ function RegisterForm() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '32px' }}>
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              id={`otp-${index}`}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleOtpChange(index, e.target.value)}
-              onKeyDown={(e) => handleOtpKeyDown(index, e)}
-              onPaste={handleOtpPaste}
-              style={{
-                width: '45px', height: '55px', fontSize: '24px', fontWeight: '800', textAlign: 'center',
-                border: digit ? '2px solid var(--brand-primary)' : '2px solid var(--border)',
-                borderRadius: '12px', background: '#fff', color: 'var(--brand-black)',
-                transition: 'all 0.2s ease', outline: 'none', boxShadow: digit ? '0 4px 12px rgba(214, 48, 98, 0.1)' : 'none'
-              }}
-            />
-          ))}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+          <input
+            id="otp-input"
+            type="text"
+            inputMode="numeric"
+            maxLength={4}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+            placeholder="0000"
+            style={{
+              width: '180px', height: '64px', fontSize: '32px', fontWeight: '800', textAlign: 'center', letterSpacing: '12px',
+              border: otp.length === 4 ? '2px solid var(--brand-primary)' : '2px solid var(--border)',
+              borderRadius: '12px', background: '#fff', color: 'var(--brand-black)',
+              transition: 'all 0.2s ease', outline: 'none', boxShadow: otp.length === 4 ? '0 4px 12px rgba(214, 48, 98, 0.1)' : 'none',
+              paddingLeft: '12px'
+            }}
+          />
         </div>
 
-        {error && step === 4 && (
+        {error && step === 3 && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px', borderRadius: '8px', color: '#ef4444', fontSize: '14px', marginBottom: '20px', textAlign: 'center', fontWeight: '600' }}>
             {error}
           </div>
@@ -370,7 +293,7 @@ function RegisterForm() {
 
         <div style={{ display: 'flex', gap: '12px' }}>
           <button type="button" onClick={prevStep} className="auth-button" style={{ background: '#fff', color: 'var(--brand-black)', border: '2px solid var(--border)', flex: 1 }}>Edit Info</button>
-          <button type="button" onClick={handleSubmit} className="auth-button" disabled={loading || otp.join('').length !== 4} style={{ flex: 2, background: otp.join('').length === 4 ? 'var(--brand-primary)' : 'var(--muted)' }}>
+          <button type="button" onClick={handleSubmit} className="auth-button" disabled={loading || otp.length !== 4} style={{ flex: 2, background: otp.length === 4 ? 'var(--brand-primary)' : 'var(--muted)' }}>
             {loading ? 'Verifying...' : 'Verify & Create Account'}
           </button>
         </div>

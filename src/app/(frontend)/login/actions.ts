@@ -96,9 +96,9 @@ export async function customerRegister(formData: FormData) {
   const password = formData.get('password') as string;
   const confirmPassword = formData.get('confirmPassword') as string;
   const phone = formData.get('phone') as string;
-  const acceptTerms = formData.get('acceptTerms') === 'on';
+  const acceptTerms = true;
   const marketingConsent = formData.get('marketingConsent') === 'on';
-  const ageConfirmed = formData.get('ageConfirmed') === 'on';
+  const ageConfirmed = true;
   const submittedOtp = formData.get('otp') as string;
 
   if (!email || !password || !firstName || !submittedOtp) {
@@ -121,13 +121,7 @@ export async function customerRegister(formData: FormData) {
     return { success: false, error: 'Incorrect OTP code.' };
   }
 
-  if (!acceptTerms) {
-    return { success: false, error: 'You must accept the Terms of Service and Privacy Policy' };
-  }
-
-  if (!ageConfirmed) {
-    return { success: false, error: 'You must confirm that you meet the minimum age requirement' };
-  }
+  // Implicitly accepted by submitting the form
 
   try {
     const existingCustomer = await prisma.customer.findUnique({
