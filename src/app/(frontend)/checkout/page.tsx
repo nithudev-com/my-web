@@ -312,10 +312,8 @@ export default function CheckoutPage() {
         </div>
         <div className="checkout-input-group">
           <label className="checkout-label">Country *</label>
-          <select name={`${prefix}_country`} className="checkout-input" autoComplete="country-name" value={addressState[`${prefix}_country`] || 'US'} onChange={handleAddressChange}>
-            <option value="US">United States</option>
+          <select name={`${prefix}_country`} className="checkout-input" autoComplete="country-name" value={addressState[`${prefix}_country`] || 'CA'} onChange={handleAddressChange}>
             <option value="CA">Canada</option>
-            <option value="GB">United Kingdom</option>
           </select>
           {getError(`${prefix}Address_country`)}
         </div>

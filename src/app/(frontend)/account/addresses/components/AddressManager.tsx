@@ -124,11 +124,6 @@ export function AddressManager({ addresses }: { addresses: any[] }) {
                   <input type="text" name="lastName" defaultValue={editingAddress?.lastName} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
                 </div>
               </div>
-              
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Company (Optional)</label>
-                <input type="text" name="company" defaultValue={editingAddress?.company} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
-              </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Address Line 1</label>
@@ -158,18 +153,14 @@ export function AddressManager({ addresses }: { addresses: any[] }) {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Country</label>
-                  <input type="text" name="country" defaultValue={editingAddress?.country || 'United States'} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
+                  <select name="country" defaultValue={editingAddress?.country || 'Canada'} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                    <option value="Canada">Canada</option>
+                  </select>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer' }}>
-                  <input type="checkbox" name="isDefaultShipping" defaultChecked={editingAddress?.isDefaultShipping} /> Set as Default Shipping
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer' }}>
-                  <input type="checkbox" name="isDefaultBilling" defaultChecked={editingAddress?.isDefaultBilling} /> Set as Default Billing
-                </label>
-              </div>
+              <input type="hidden" name="isDefaultShipping" value="on" />
+              <input type="hidden" name="isDefaultBilling" value="on" />
 
               <div style={{ marginTop: '24px', display: 'flex', gap: '16px' }}>
                 <button type="button" onClick={handleCloseModal} style={{ flex: 1, padding: '12px', background: '#f1f5f9', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
