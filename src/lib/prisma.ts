@@ -12,6 +12,9 @@ const fixedUrl = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws
 process.env.DATABASE_URL = fixedUrl;
 process.env.DIRECT_URL = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:5432/postgres";
 
+// Prevent "OS can't spawn worker thread (os error 11)" on Hostinger shared servers
+process.env.TOKIO_WORKER_THREADS = "1";
+
 export const prisma =
   globalForPrismaV7.prisma ??
   new PrismaClient({
