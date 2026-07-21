@@ -38,6 +38,11 @@ process.env.TOKIO_WORKER_THREADS = "1";
 export const prisma =
   globalForPrismaV7.prisma ??
   new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL
+      }
+    },
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]
   });
 
