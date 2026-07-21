@@ -186,7 +186,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
                     id={id}
                     title={product.title}
                     slug={product.slug}
-                    image={product.mainImage}
+                    image={product.mainImage || (product as any).images?.[0]?.imageUrl || ""}
                     price={product.basePrice.toString()}
                     salePrice={product.salePrice?.toString()}
                     category={product.category?.name}

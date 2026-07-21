@@ -209,7 +209,7 @@ export default async function BrandPage({ params, searchParams }: { params: Prom
                       id={product.id.toString()}
                       title={cleanText(product.title)}
                       slug={product.slug}
-                      image={product.mainImage}
+                      image={product.mainImage || (product as any).images?.[0]?.imageUrl || ""}
                       price={product.basePrice.toString()}
                       salePrice={product.salePrice?.toString()}
                       category={product.category?.name}

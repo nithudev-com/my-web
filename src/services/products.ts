@@ -13,6 +13,7 @@ export const productListSelect = {
   mainImage: true,
   category: { select: { name: true, slug: true } },
   brand: { select: { name: true, slug: true } },
+  images: { select: { imageUrl: true }, orderBy: { sortOrder: "asc" }, take: 1 },
   _count: { select: { variants: true } }
 } as const;
 
