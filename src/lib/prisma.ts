@@ -2,15 +2,35 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrismaV7 = globalThis as unknown as { prisma?: PrismaClient };
 
-// Force the exact correct DATABASE_URL with port 6543 (PgBouncer transaction pooler)
-// to avoid EMAXCONNSESSION (max clients reached) during Next.js parallel static builds.
-// We hardcode the URL-encoded password (%40) to prevent Hostinger environment parsing bugs.
-const fixedUrl = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1";
+/**
+ * Hostinger Environment Fixer
+ * Hostinger's panel often passes passwords with a literal `@` (unencoded), which crashes Prisma.
+ * This dynamically intercepts the environment variables and encodes the password safely.
+ */
+function fixPrismaUrl(url: string | undefined): string | undefined {
+  if (!url) return url;
+  // Matches: 1=postgresql://user:  2=password  3=@host:port/db...
+  const match = url.match(/^(postgresql:\/\/[^:]+:)(.*)(@[^@]+:\d+\/.*)$/);
+  if (match) {
+    const prefix = match[1];
+    let password = match[2];
+    const suffix = match[3];
+    
+    if (password.includes("@")) {
+      password = password.replace(/@/g, "%40");
+      return `${prefix}${password}${suffix}`;
+    }
+  }
+  return url;
+}
 
-// We MUST override the environment variables directly because the Prisma Rust engine
-// reads from process.env internally during initialization and will crash if DIRECT_URL is malformed.
-process.env.DATABASE_URL = fixedUrl;
-process.env.DIRECT_URL = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:5432/postgres";
+// Dynamically fix the environment variables from the Hostinger panel before Prisma loads them
+if (process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = fixPrismaUrl(process.env.DATABASE_URL)!;
+}
+if (process.env.DIRECT_URL) {
+  process.env.DIRECT_URL = fixPrismaUrl(process.env.DIRECT_URL)!;
+}
 
 // Prevent "OS can't spawn worker thread (os error 11)" on Hostinger shared servers
 process.env.TOKIO_WORKER_THREADS = "1";
@@ -18,11 +38,6 @@ process.env.TOKIO_WORKER_THREADS = "1";
 export const prisma =
   globalForPrismaV7.prisma ??
   new PrismaClient({
-    datasources: {
-      db: {
-        url: fixedUrl
-      }
-    },
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]
   });
 
