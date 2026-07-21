@@ -183,26 +183,35 @@ export async function processCheckout(
   };
 }
 
-export async function getCustomerAddresses() {
+export async function getCustomerCheckoutInfo() {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get('customer_auth')?.value;
 
-  if (!authCookie) return [];
+  if (!authCookie) return { email: '', phone: '', addresses: [] };
 
   try {
-    const addresses = await prisma.customerAddress.findMany({
-      where: { customerId: BigInt(authCookie) },
-      orderBy: { isDefaultShipping: 'desc' }
+    const customer = await prisma.customer.findUnique({
+      where: { id: BigInt(authCookie) },
+      include: {
+        addresses: {
+          orderBy: { isDefaultShipping: 'desc' }
+        }
+      }
     });
 
-    // Serialize BigInts before returning
-    return addresses.map(addr => ({
-      ...addr,
-      id: addr.id.toString(),
-      customerId: addr.customerId.toString(),
-    }));
+    if (!customer) return { email: '', phone: '', addresses: [] };
+
+    return {
+      email: customer.email,
+      phone: customer.phone || '',
+      addresses: customer.addresses.map(addr => ({
+        ...addr,
+        id: addr.id.toString(),
+        customerId: addr.customerId.toString(),
+      }))
+    };
   } catch (error) {
-    console.error("Failed to fetch addresses", error);
-    return [];
+    console.error("Failed to fetch customer info", error);
+    return { email: '', phone: '', addresses: [] };
   }
 }

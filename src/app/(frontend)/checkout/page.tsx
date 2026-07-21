@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { processCheckout, CheckoutActionState, getCustomerAddresses } from './actions';
+import { processCheckout, CheckoutActionState, getCustomerCheckoutInfo } from './actions';
 import { useCart } from '@/hooks/useCart';
 import { revalidateCartTotals, RevalidatedCart, getShippingOptions, ShippingOption } from './cart-actions';
 import { toast } from 'react-hot-toast';
@@ -14,6 +14,8 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [formState, setFormState] = useState<CheckoutActionState>({ success: false });
 
   // Legal Checkbox Refs & State
@@ -33,10 +35,13 @@ export default function CheckoutPage() {
   const [cartLoading, setCartLoading] = useState(false);
 
   useEffect(() => {
-    getCustomerAddresses().then(addresses => {
-      setSavedAddresses(addresses);
-      if (addresses.length > 0) {
-        setSelectedAddressId(addresses[0].id);
+    getCustomerCheckoutInfo().then(info => {
+      if (info.email) setCustomerEmail(info.email);
+      if (info.phone) setCustomerPhone(info.phone);
+      
+      setSavedAddresses(info.addresses);
+      if (info.addresses.length > 0) {
+        setSelectedAddressId(info.addresses[0].id);
       }
     });
 
@@ -195,49 +200,74 @@ export default function CheckoutPage() {
     ) : null;
   };
 
-  const renderAddressFields = (prefix: 'shipping' | 'billing') => (
-    <div className="checkout-grid" style={{ marginTop: '16px' }}>
-      <div className="checkout-input-group">
-        <label className="checkout-label">First Name *</label>
-        <input name={`${prefix}_firstName`} type="text" className="checkout-input" autoComplete="given-name" />
-        {getError(`${prefix}Address_firstName`)}
+  const renderAddressFields = (prefix: 'shipping' | 'billing') => {
+    if (prefix === 'shipping' && selectedAddressId) {
+      const addr = savedAddresses.find(a => a.id === selectedAddressId);
+      if (addr) {
+        return (
+          <>
+            <input type="hidden" name={`${prefix}_firstName`} value={addr.firstName} />
+            <input type="hidden" name={`${prefix}_lastName`} value={addr.lastName} />
+            <input type="hidden" name={`${prefix}_addressLine1`} value={addr.addressLine1} />
+            <input type="hidden" name={`${prefix}_city`} value={addr.city} />
+            <input type="hidden" name={`${prefix}_state`} value={addr.state} />
+            <input type="hidden" name={`${prefix}_postalCode`} value={addr.postalCode} />
+            <input type="hidden" name={`${prefix}_country`} value={addr.country} />
+            <div style={{ padding: '16px', background: '#f8fafc', border: '1px solid var(--co-border)', borderRadius: '12px', fontSize: '14px', lineHeight: '1.6', marginTop: '16px' }}>
+              <strong>{addr.firstName} {addr.lastName}</strong><br/>
+              {addr.addressLine1}<br/>
+              {addr.city}, {addr.state} {addr.postalCode}<br/>
+              {addr.country}
+            </div>
+          </>
+        );
+      }
+    }
+
+    return (
+      <div className="checkout-grid" style={{ marginTop: '16px' }}>
+        <div className="checkout-input-group">
+          <label className="checkout-label">First Name *</label>
+          <input name={`${prefix}_firstName`} type="text" className="checkout-input" autoComplete="given-name" />
+          {getError(`${prefix}Address_firstName`)}
+        </div>
+        <div className="checkout-input-group">
+          <label className="checkout-label">Last Name *</label>
+          <input name={`${prefix}_lastName`} type="text" className="checkout-input" autoComplete="family-name" />
+          {getError(`${prefix}Address_lastName`)}
+        </div>
+        <div className="checkout-input-group full" style={{ gridColumn: '1 / -1' }}>
+          <label className="checkout-label">Address Line 1 *</label>
+          <input name={`${prefix}_addressLine1`} type="text" className="checkout-input" autoComplete="address-line1" placeholder="Street address" />
+          {getError(`${prefix}Address_addressLine1`)}
+        </div>
+        <div className="checkout-input-group">
+          <label className="checkout-label">City *</label>
+          <input name={`${prefix}_city`} type="text" className="checkout-input" autoComplete="address-level2" />
+          {getError(`${prefix}Address_city`)}
+        </div>
+        <div className="checkout-input-group">
+          <label className="checkout-label">State / Province *</label>
+          <input name={`${prefix}_state`} type="text" className="checkout-input" autoComplete="address-level1" />
+          {getError(`${prefix}Address_state`)}
+        </div>
+        <div className="checkout-input-group">
+          <label className="checkout-label">Postal Code *</label>
+          <input name={`${prefix}_postalCode`} type="text" className="checkout-input" autoComplete="postal-code" />
+          {getError(`${prefix}Address_postalCode`)}
+        </div>
+        <div className="checkout-input-group">
+          <label className="checkout-label">Country *</label>
+          <select name={`${prefix}_country`} className="checkout-input" autoComplete="country-name" defaultValue="US">
+            <option value="US">United States</option>
+            <option value="CA">Canada</option>
+            <option value="GB">United Kingdom</option>
+          </select>
+          {getError(`${prefix}Address_country`)}
+        </div>
       </div>
-      <div className="checkout-input-group">
-        <label className="checkout-label">Last Name *</label>
-        <input name={`${prefix}_lastName`} type="text" className="checkout-input" autoComplete="family-name" />
-        {getError(`${prefix}Address_lastName`)}
-      </div>
-      <div className="checkout-input-group full" style={{ gridColumn: '1 / -1' }}>
-        <label className="checkout-label">Address Line 1 *</label>
-        <input name={`${prefix}_addressLine1`} type="text" className="checkout-input" autoComplete="address-line1" placeholder="Street address" />
-        {getError(`${prefix}Address_addressLine1`)}
-      </div>
-      <div className="checkout-input-group">
-        <label className="checkout-label">City *</label>
-        <input name={`${prefix}_city`} type="text" className="checkout-input" autoComplete="address-level2" />
-        {getError(`${prefix}Address_city`)}
-      </div>
-      <div className="checkout-input-group">
-        <label className="checkout-label">State / Province *</label>
-        <input name={`${prefix}_state`} type="text" className="checkout-input" autoComplete="address-level1" />
-        {getError(`${prefix}Address_state`)}
-      </div>
-      <div className="checkout-input-group">
-        <label className="checkout-label">Postal Code *</label>
-        <input name={`${prefix}_postalCode`} type="text" className="checkout-input" autoComplete="postal-code" />
-        {getError(`${prefix}Address_postalCode`)}
-      </div>
-      <div className="checkout-input-group">
-        <label className="checkout-label">Country *</label>
-        <select name={`${prefix}_country`} className="checkout-input" autoComplete="country-name" defaultValue="US">
-          <option value="US">United States</option>
-          <option value="CA">Canada</option>
-          <option value="GB">United Kingdom</option>
-        </select>
-        {getError(`${prefix}Address_country`)}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="checkout-container">
@@ -353,12 +383,12 @@ export default function CheckoutPage() {
               <div className="checkout-grid full">
                 <div className="checkout-input-group">
                   <label className="checkout-label">Email Address *</label>
-                  <input name="email" type="email" className="checkout-input" placeholder="you@example.com" autoComplete="email" />
+                  <input name="email" type="email" className="checkout-input" placeholder="you@example.com" autoComplete="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
                   {getError('email')}
                 </div>
                 <div className="checkout-input-group">
                   <label className="checkout-label">Phone Number *</label>
-                  <input name="phone" type="tel" className="checkout-input" placeholder="(555) 123-4567" autoComplete="tel" />
+                  <input name="phone" type="tel" className="checkout-input" placeholder="(555) 123-4567" autoComplete="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
                   {getError('phone')}
                 </div>
               </div>
