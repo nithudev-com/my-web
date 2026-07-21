@@ -6,6 +6,11 @@ const globalForPrismaV7 = globalThis as unknown as { prisma?: PrismaClient };
 // automatically unescapes '%40' to '@', which breaks the Prisma Postgres parser.
 const fixedUrl = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:5432/postgres";
 
+// We MUST override the environment variables directly because the Prisma Rust engine
+// reads from process.env internally during initialization and will crash if DIRECT_URL is malformed.
+process.env.DATABASE_URL = fixedUrl;
+process.env.DIRECT_URL = fixedUrl;
+
 export const prisma =
   globalForPrismaV7.prisma ??
   new PrismaClient({
