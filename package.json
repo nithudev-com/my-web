@@ -5,7 +5,7 @@
   "description": "Speed-first Next.js ecommerce starter with PostgreSQL, Redis, Meilisearch, importer, and ISR revalidation.",
   "scripts": {
     "dev": "next dev",
-    "build": "rm -rf .next && prisma generate && next build",
+    "build": "rm -rf .next && prisma generate && TOKIO_WORKER_THREADS=1 next build",
     "start": "next start",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
