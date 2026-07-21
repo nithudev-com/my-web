@@ -7,7 +7,7 @@ import { MegaMenu } from "./MegaMenu";
 import { useCartContext } from "@/context/CartContext";
 import { useWishlistContext } from "@/context/WishlistContext";
 
-export function Header({ settings, categories = [] }: { settings: any, categories?: any[] }) {
+export function Header({ settings, categories = [], isLoggedIn = false }: { settings: any, categories?: any[], isLoggedIn?: boolean }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
@@ -43,11 +43,11 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
           <AutocompleteSearch isMobile={false} categories={categories} />
 
           <div className="header-action-group">
-            <Link prefetch={true} href="/account" className="header-action-item">
+            <Link prefetch={true} href={isLoggedIn ? "/account" : "/login"} className="header-action-item">
               <div className="header-action-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               </div>
-              <span>Account</span>
+              <span>{isLoggedIn ? 'Account' : 'Sign In'}</span>
             </Link>
             
             <Link prefetch={true} href="/account/wishlist" className="header-action-item">
@@ -76,10 +76,10 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
           </button>
           <div className="bottom-nav-links">
             <Link prefetch={true} href="/deals">Today's Deals</Link>
-
             <Link prefetch={true} href="/new-releases">New Releases</Link>
             <Link prefetch={true} href="/brand">Brands</Link>
             <Link prefetch={true} href="/category">Categories</Link>
+            <Link prefetch={true} href="/blog">Blog</Link>
             <Link prefetch={true} href="/contact">Customer Service</Link>
           </div>
           <MegaMenu 
@@ -125,8 +125,16 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             </div>
             <div>
-              <div style={{ fontSize: '16px', fontWeight: '700' }}>Hello, Guest</div>
-              <Link prefetch={true} href="/login" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '13px', color: '#D63062', textDecoration: 'none' }}>Sign In</Link>
+              <div style={{ fontSize: '16px', fontWeight: '700' }}>Hello, {isLoggedIn ? 'Customer' : 'Guest'}</div>
+              {isLoggedIn ? (
+                <Link prefetch={true} href="/account" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '13px', color: '#D63062', textDecoration: 'none', fontWeight: 600 }}>My Account</Link>
+              ) : (
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <Link prefetch={true} href="/login" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '13px', color: '#D63062', textDecoration: 'none', fontWeight: 600 }}>Sign In</Link>
+                  <span style={{ fontSize: '13px', color: '#cbd5e1' }}>|</span>
+                  <Link prefetch={true} href="/register" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '13px', color: '#D63062', textDecoration: 'none', fontWeight: 600 }}>Sign Up</Link>
+                </div>
+              )}
             </div>
           </div>
           <button aria-label="Close Mobile Menu" className="mobile-drawer-close" onClick={() => setIsMobileMenuOpen(false)}>
@@ -189,17 +197,23 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
           </div>
         </div>
 
-        <div className="mobile-drawer-section">
-          <h3 className="mobile-drawer-title">My Account</h3>
-          <div className="mobile-drawer-links">
-            <Link prefetch={true} href="/account/orders" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Orders</Link>
-            <Link prefetch={true} href="/account/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Wishlist</Link>
-            <Link prefetch={true} href="/account/profile" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Account Settings</Link>
+        {isLoggedIn && (
+          <div className="mobile-drawer-section">
+            <h3 className="mobile-drawer-title">My Account</h3>
+            <div className="mobile-drawer-links">
+              <Link prefetch={true} href="/account/orders" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Orders</Link>
+              <Link prefetch={true} href="/account/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Your Wishlist</Link>
+              <Link prefetch={true} href="/account/profile" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Account Settings</Link>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="mobile-drawer-section" style={{ borderBottom: 'none' }}>
           <div className="mobile-drawer-links">
+            <Link prefetch={true} href="/deals" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Today's Deals</Link>
+            <Link prefetch={true} href="/new-releases" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">New Releases</Link>
+            <Link prefetch={true} href="/brand" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Brands</Link>
+            <Link prefetch={true} href="/blog" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Blog</Link>
             <Link prefetch={true} href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="mobile-drawer-link">Customer Service</Link>
           </div>
         </div>

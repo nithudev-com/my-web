@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
+import { cookies } from 'next/headers';
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getStoreSettings } from "@/services/settings";
@@ -8,6 +9,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { SlideOutCart } from "@/components/SlideOutCart";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { LiveChatWidget } from "@/components/LiveChatWidget";
+
 const getCachedCategories = unstable_cache(
   async () => {
     const data = await prisma.category.findMany({
@@ -28,8 +30,10 @@ export default async function StoreLayout({
   children: React.ReactNode;
 }) {
   const storeSettings = await getStoreSettings();
-
   const categories = await getCachedCategories();
+  const cookieStore = await cookies();
+  const customerIdStr = cookieStore.get('customer_auth')?.value;
+  const isLoggedIn = !!customerIdStr;
 
   const safeSettings = JSON.parse(JSON.stringify(storeSettings, (k, v) => typeof v === 'bigint' ? v.toString() : v));
   const safeCategories = JSON.parse(JSON.stringify(categories, (k, v) => typeof v === 'bigint' ? v.toString() : v));
@@ -37,7 +41,7 @@ export default async function StoreLayout({
   return (
     <CartProvider>
       <WishlistProvider>
-        <Header settings={safeSettings} categories={safeCategories} />
+        <Header settings={safeSettings} categories={safeCategories} isLoggedIn={isLoggedIn} />
         {children}
         <Footer settings={safeSettings} />
         <SlideOutCart />
