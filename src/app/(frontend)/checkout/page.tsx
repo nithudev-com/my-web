@@ -113,7 +113,25 @@ export default function CheckoutPage() {
     // Test the coupon against the server
     const result = await revalidateCartTotals(cart.items, selectedShippingId, couponInput.trim());
     
-    if (result.error && result.error.toLowerCase().includes('coupon')) {
+    if (result.couponError) {
+      toast.error(result.couponError, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: 'rgba(255, 255, 255, 0.95)',
+          color: '#1e293b',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+          borderRadius: '16px',
+          padding: '16px 20px',
+          fontWeight: 500,
+          fontSize: '15px'
+        },
+        iconTheme: { primary: '#ef4444', secondary: '#fff' },
+      });
+      setAppliedCoupon(undefined);
+    } else if (result.error && result.error.toLowerCase().includes('coupon')) {
       toast.error(result.error, {
         duration: 4000,
         position: 'top-center',
@@ -128,11 +146,8 @@ export default function CheckoutPage() {
           fontWeight: 500,
           fontSize: '15px'
         },
-        iconTheme: {
-          primary: '#ef4444',
-          secondary: '#fff',
-        },
-      }); // Show error for invalid coupon
+        iconTheme: { primary: '#ef4444', secondary: '#fff' },
+      });
       setAppliedCoupon(undefined);
     } else {
       setAppliedCoupon(couponInput.trim());

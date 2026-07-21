@@ -31,6 +31,7 @@ export type RevalidatedCart = {
   totals: CartTotals;
   isValid: boolean;
   error?: string;
+  couponError?: string;
   couponMessage?: string;
 };
 
@@ -157,6 +158,7 @@ export async function revalidateCartTotals(
   // 2. Coupon Validation
   let discount = 0;
   let couponMessage = undefined;
+  let couponError = undefined;
 
   if (couponCode) {
     const coupon = await prisma.coupon.findUnique({
@@ -164,15 +166,15 @@ export async function revalidateCartTotals(
     });
 
     if (!coupon) {
-      errorMsg = "Invalid coupon code.";
+      couponError = "Invalid coupon code.";
     } else if (!coupon.isActive) {
-      errorMsg = "This coupon is no longer active.";
+      couponError = "This coupon is no longer active.";
     } else if (coupon.expiresAt && coupon.expiresAt < new Date()) {
-      errorMsg = "This coupon has expired.";
+      couponError = "This coupon has expired.";
     } else if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      errorMsg = "This coupon has reached its usage limit.";
+      couponError = "This coupon has reached its usage limit.";
     } else if (coupon.minOrderValue && subtotal < Number(coupon.minOrderValue)) {
-      errorMsg = `This coupon requires a minimum order of $${Number(coupon.minOrderValue).toFixed(2)}.`;
+      couponError = `This coupon requires a minimum order of $${Number(coupon.minOrderValue).toFixed(2)}.`;
     } else {
       // Coupon is valid
       if (coupon.discountType === 'PERCENTAGE') {
@@ -222,6 +224,7 @@ export async function revalidateCartTotals(
     },
     isValid,
     error: errorMsg,
+    couponError,
     couponMessage
   };
 }

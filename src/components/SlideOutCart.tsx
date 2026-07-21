@@ -34,6 +34,11 @@ export function SlideOutCart() {
                cart.syncItems(validItems);
              }
           }
+
+          // Auto-remove invalid coupons
+          if (result.couponError && cart.couponCode) {
+            cart.setCouponCode(null);
+          }
         })
         .catch(() => {
           setIsLoading(false);
@@ -62,6 +67,12 @@ export function SlideOutCart() {
         {validatedCart?.error && (
           <div style={{ background: '#fef2f2', color: '#ef4444', padding: '12px', margin: '16px 16px 0', borderRadius: '8px', fontSize: '13px', fontWeight: 500, textAlign: 'center' }}>
             {validatedCart.error}
+          </div>
+        )}
+        {validatedCart?.couponError && (
+          <div style={{ background: '#fffbeb', color: '#b45309', border: '1px solid #fcd34d', padding: '10px 12px', margin: '16px 16px 0', borderRadius: '8px', fontSize: '13px', fontWeight: 500, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            {validatedCart.couponError}
           </div>
         )}
 
