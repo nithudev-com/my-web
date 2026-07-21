@@ -178,7 +178,7 @@ export function SlideOutCart() {
             </div>
             
             <Link prefetch={true} href="/checkout" className="cart-drawer-checkout" onClick={cart.closeCart} style={{ marginTop: '16px' }}>
-              Secure Checkout
+              Checkout Now
             </Link>
           </div>
         )}

@@ -26,7 +26,7 @@ export default function LoadingBrand() {
         <div className="container">
           <div className="layout-grid" style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '32px', alignItems: 'start' }}>
             {/* Sidebar Skeleton */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', display: 'none' }} className="skeleton-sidebar">
+            <div style={{ display: 'none', flexDirection: 'column', gap: '16px' }} className="skeleton-sidebar">
               <div style={{ height: '32px', width: '100%', background: '#f1f5f9', borderRadius: '8px' }}></div>
               <div style={{ height: '200px', width: '100%', background: '#f8fafc', borderRadius: '12px' }}></div>
               <div style={{ height: '200px', width: '100%', background: '#f8fafc', borderRadius: '12px' }}></div>
