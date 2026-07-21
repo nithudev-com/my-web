@@ -24,6 +24,9 @@ export async function sendPasswordResetOtp(email: string) {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
         <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://sextoyslovers.com/logo-new.png" alt="SexToys Lovers Logo" style="max-width: 200px; height: auto;" />
+        </div>
+        <div style="text-align: center; margin-bottom: 30px;">
           <h2 style="color: #0f172a; margin: 0; font-size: 24px; font-weight: 800;">Password Reset</h2>
         </div>
         <p style="color: #475569; font-size: 16px; line-height: 1.6;">Hi ${customer.firstName || 'there'},</p>

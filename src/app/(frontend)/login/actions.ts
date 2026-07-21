@@ -20,14 +20,19 @@ export async function sendRegistrationOtp(email: string, firstName: string) {
     cookieStore.set('reg_otp', hashedOtp, { maxAge: 600, httpOnly: true, secure: process.env.NODE_ENV === 'production' });
 
     const html = `
-      <div style="font-family: Arial, sans-serif; text-align: center; max-width: 500px; margin: 0 auto; padding: 20px;">
-        <h2>Verify Your Email</h2>
-        <p>Hi ${firstName},</p>
-        <p>Thank you for registering at SexToys Lovers. Please use the following 4-digit code to verify your email address:</p>
-        <div style="font-size: 32px; font-weight: bold; color: #D63062; margin: 20px 0; padding: 15px; background: #FFF4F7; border-radius: 8px; letter-spacing: 4px;">
+      <div style="font-family: Arial, sans-serif; text-align: center; max-width: 500px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://sextoyslovers.com/logo-new.png" alt="SexToys Lovers Logo" style="max-width: 200px; height: auto;" />
+        </div>
+        <h2 style="color: #0f172a; margin: 0; font-size: 24px; font-weight: 800; margin-bottom: 20px;">Verify Your Email</h2>
+        <p style="color: #475569; font-size: 16px; line-height: 1.6;">Hi ${firstName},</p>
+        <p style="color: #475569; font-size: 16px; line-height: 1.6;">Thank you for registering at SexToys Lovers. Please use the following 4-digit code to verify your email address:</p>
+        <div style="display: inline-block; font-size: 32px; font-weight: 900; color: #D63062; margin: 30px 0; padding: 20px 40px; background: #FFF4F7; border-radius: 12px; letter-spacing: 8px; border: 2px dashed #fbcfe8;">
           ${otp}
         </div>
-        <p style="color: #64748b; font-size: 13px;">This code will expire in 10 minutes.</p>
+        <p style="color: #64748b; font-size: 14px; text-align: center;">This code will expire in 10 minutes.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
+        <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">If you didn't request a verification code, you can safely ignore this email.</p>
       </div>
     `;
 
@@ -154,16 +159,25 @@ export async function customerRegister(formData: FormData) {
     });
 
     try {
-      await queueEmail({
-        idempotencyKey: `welcome-${customer.id}-${Date.now()}`,
-        channel: EmailChannel.TRANSACTIONAL,
-        recipientEmail: customer.email,
-        templateName: 'welcome_email',
-        payload: { firstName: customer.firstName || 'there' },
-        customerId: customer.id.toString()
-      });
+      const welcomeHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; text-align: center;">
+          <div style="margin-bottom: 30px;">
+            <img src="https://sextoyslovers.com/logo-new.png" alt="SexToys Lovers Logo" style="max-width: 200px; height: auto;" />
+          </div>
+          <h2 style="color: #0f172a; margin: 0; font-size: 26px; font-weight: 800; margin-bottom: 20px;">Welcome to SexToys Lovers!</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; text-align: left;">Hi ${customer.firstName || 'there'},</p>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; text-align: left;">We are thrilled to welcome you to SexToys Lovers. Your account has been successfully created.</p>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; text-align: left;">With your new account, you can enjoy faster checkout, track your orders, and gain access to exclusive deals tailored just for you.</p>
+          <div style="margin: 30px 0;">
+            <a href="https://sextoyslovers.com/account" style="display: inline-block; padding: 14px 30px; background-color: #D63062; color: #ffffff; text-decoration: none; font-weight: 700; border-radius: 8px; font-size: 16px;">Go to My Account</a>
+          </div>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
+          <p style="color: #94a3b8; font-size: 13px; text-align: center; margin: 0;">If you have any questions, feel free to reply to this email. We're here to help 24/7.</p>
+        </div>
+      `;
+      await emailProvider.sendRawEmail(customer.email, "Welcome to SexToys Lovers!", welcomeHtml);
     } catch (e) {
-      console.error("Failed to queue welcome email:", e);
+      console.error("Failed to send welcome email:", e);
     }
 
     // Automatically log in the new user
