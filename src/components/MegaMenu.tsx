@@ -27,7 +27,7 @@ export function MegaMenu({ categories, isOpen, onClose }: MegaMenuProps) {
     }
   }, [isOpen, categories, activeCategory]);
 
-  if (!isOpen) return null;
+  // Removed early return so Next.js Link doesn't cancel navigation when closing
 
   const activeCatData = categories.find((c) => c.id === activeCategory);
 
@@ -341,8 +341,8 @@ export function MegaMenu({ categories, isOpen, onClose }: MegaMenuProps) {
         }
       `}</style>
 
-      <div className="mega-menu-overlay" onClick={onClose} />
-      <div className="mega-menu-container">
+      <div className="mega-menu-overlay" onClick={onClose} style={{ display: isOpen ? 'block' : 'none' }} />
+      <div className="mega-menu-container" style={{ display: isOpen ? 'flex' : 'none' }}>
         <div className="mega-menu-sidebar">
           {categories.map((cat) => (
             <div

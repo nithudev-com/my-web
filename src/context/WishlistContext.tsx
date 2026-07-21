@@ -17,10 +17,26 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    // 1. Instantly load from localStorage for lightning-fast speed!
+    try {
+      const stored = localStorage.getItem('guest_wishlist');
+      if (stored) {
+        setWishlistIds(new Set(JSON.parse(stored)));
+      }
+    } catch (e) {}
+    setIsLoaded(true);
+
+    // 2. Non-blocking background sync with server
     getWishlistProductIds().then((ids) => {
-      setWishlistIds(new Set(ids.map(id => id.toString())));
-      setIsLoaded(true);
-    });
+      if (ids.length > 0) {
+        setWishlistIds(prev => {
+          const newSet = new Set(prev);
+          ids.forEach(id => newSet.add(id.toString()));
+          localStorage.setItem('guest_wishlist', JSON.stringify([...newSet]));
+          return newSet;
+        });
+      }
+    }).catch(() => {});
 
     const handleWishlistUpdated = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -32,6 +48,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
           } else {
             newSet.delete(customEvent.detail.productId);
           }
+          try {
+            localStorage.setItem('guest_wishlist', JSON.stringify([...newSet]));
+          } catch(e) {}
           return newSet;
         });
       }
