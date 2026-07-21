@@ -9,6 +9,43 @@ import { CategoryCircles } from "@/components/CategoryCircles";
 
 export const revalidate = 900;
 
+const getHomePageData = unstable_cache(
+  async (productIdsString: string) => {
+    const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
+    
+    const reviewStats = ids.length > 0
+      ? await prisma.review.groupBy({
+          by: ["productId"],
+          where: { productId: { in: ids }, approved: true },
+          _avg: { rating: true },
+          _count: { rating: true },
+        })
+      : [];
+
+    const [brands, categories, circles] = await Promise.all([
+      prisma.brand.findMany({
+        where: { showOnHome: true },
+        select: { id: true, name: true, slug: true, logo: true },
+        orderBy: { name: "asc" },
+        take: 20,
+      }),
+      prisma.category.findMany({
+        where: { showOnHome: true },
+        select: { id: true, name: true, slug: true, image: true, seoTitle: true },
+        take: 16,
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      }),
+      prisma.categoryCircle.findMany({ orderBy: { sortOrder: "asc" } }),
+    ]);
+
+    const serialize = (obj: any) => JSON.parse(JSON.stringify(obj, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    
+    return serialize({ reviewStats, brands, categories, circles });
+  },
+  ['home-page-data'],
+  { revalidate: 900, tags: ['home-data'] }
+);
+
 export default async function HomePage() {
   const products = await getHomeProducts();
 
@@ -16,43 +53,6 @@ export default async function HomePage() {
   const productIds = (products || [])
     .map((p) => BigInt(p.id.toString()))
     .filter(Boolean);
-
-  const getHomePageData = unstable_cache(
-    async (productIdsString: string) => {
-      const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
-      
-      const reviewStats = ids.length > 0
-        ? await prisma.review.groupBy({
-            by: ["productId"],
-            where: { productId: { in: ids }, approved: true },
-            _avg: { rating: true },
-            _count: { rating: true },
-          })
-        : [];
-
-      const [brands, categories, circles] = await Promise.all([
-        prisma.brand.findMany({
-          where: { showOnHome: true },
-          select: { id: true, name: true, slug: true, logo: true },
-          orderBy: { name: "asc" },
-          take: 20,
-        }),
-        prisma.category.findMany({
-          where: { showOnHome: true },
-          select: { id: true, name: true, slug: true, image: true, seoTitle: true },
-          take: 16,
-          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-        }),
-        prisma.categoryCircle.findMany({ orderBy: { sortOrder: "asc" } }),
-      ]);
-
-      const serialize = (obj: any) => JSON.parse(JSON.stringify(obj, (k, v) => typeof v === 'bigint' ? v.toString() : v));
-      
-      return serialize({ reviewStats, brands, categories, circles });
-    },
-    ['home-page-data'],
-    { revalidate: 900, tags: ['home-data'] }
-  );
 
   const productIdsString = productIds.join(',');
   const { reviewStats, brands, categories, circles } = await getHomePageData(productIdsString);

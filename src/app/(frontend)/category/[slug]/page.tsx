@@ -26,6 +26,31 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+const getCategoryPageData = unstable_cache(
+  async (categoryId: string | bigint, productIdsString: string) => {
+    const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
+    const [subcategories, reviewStats] = await Promise.all([
+      prisma.category.findMany({
+        where: { parentId: BigInt(categoryId) },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+        select: { id: true, name: true, slug: true, image: true }
+      }),
+      ids.length > 0
+        ? prisma.review.groupBy({
+            by: ['productId'],
+            where: { productId: { in: ids }, approved: true },
+            _avg: { rating: true },
+            _count: { rating: true },
+          })
+        : Promise.resolve([]),
+    ]);
+    const serialize = (obj: any) => JSON.parse(JSON.stringify(obj, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    return serialize({ subcategories, reviewStats });
+  },
+  ['category-page-data'],
+  { revalidate: 1800, tags: ['categories', 'reviews'] }
+);
+
 export default async function CategoryPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string, minPrice?: string, maxPrice?: string, sort?: string, brand?: string }> }) {
   const { slug } = await params;
   const query = await searchParams;
@@ -41,30 +66,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   if (!category) notFound();
 
   const productIds = (products || []).map((p) => BigInt(p.id.toString()));
-  const getCategoryPageData = unstable_cache(
-    async (categoryId: string | bigint, productIdsString: string) => {
-      const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
-      const [subcategories, reviewStats] = await Promise.all([
-        prisma.category.findMany({
-          where: { parentId: BigInt(categoryId) },
-          orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-          select: { id: true, name: true, slug: true, image: true }
-        }),
-        ids.length > 0
-          ? prisma.review.groupBy({
-              by: ['productId'],
-              where: { productId: { in: ids }, approved: true },
-              _avg: { rating: true },
-              _count: { rating: true },
-            })
-          : Promise.resolve([]),
-      ]);
-      const serialize = (obj: any) => JSON.parse(JSON.stringify(obj, (k, v) => typeof v === 'bigint' ? v.toString() : v));
-      return serialize({ subcategories, reviewStats });
-    },
-    [`category-data-${category.id.toString()}-${productIds.join(',')}`],
-    { revalidate: 1800, tags: ['categories', 'reviews'] }
-  );
+
 
   const { subcategories, reviewStats } = await getCategoryPageData(category.id, productIds.join(','));
 

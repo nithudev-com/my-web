@@ -90,6 +90,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+const getRelatedProducts = unstable_cache(
+  async (categoryId: string | bigint | null, excludeId: string | bigint) => {
+    if (!categoryId) return [];
+    return prisma.product.findMany({
+      where: { categoryId: BigInt(categoryId), id: { not: BigInt(excludeId) }, status: 'ACTIVE' },
+      take: 4,
+      select: { 
+        id: true, 
+        title: true, 
+        slug: true, 
+        mainImage: true, 
+        basePrice: true, 
+        salePrice: true,
+        stockQuantity: true,
+        category: { select: { name: true } },
+        brand: { select: { name: true } },
+        _count: { select: { variants: true } }
+      }
+    }).then(data => JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v)));
+  },
+  ['related-products-cache'],
+  { revalidate: 3600, tags: ['products'] }
+);
+
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
@@ -100,29 +124,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!product) notFound();
 
   // Related Products Query (Cached)
-  const getRelatedProducts = unstable_cache(
-    async (categoryId: string | bigint | null, excludeId: string | bigint) => {
-      if (!categoryId) return [];
-      return prisma.product.findMany({
-        where: { categoryId: BigInt(categoryId), id: { not: BigInt(excludeId) }, status: 'ACTIVE' },
-        take: 4,
-        select: { 
-          id: true, 
-          title: true, 
-          slug: true, 
-          mainImage: true, 
-          basePrice: true, 
-          salePrice: true,
-          stockQuantity: true,
-          category: { select: { name: true } },
-          brand: { select: { name: true } },
-          _count: { select: { variants: true } }
-        }
-      }).then(data => JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v)));
-    },
-    [`related-products-${product.categoryId?.toString()}-${product.id.toString()}`],
-    { revalidate: 3600, tags: ['products'] }
-  );
+
 
   const relatedProducts = await getRelatedProducts(product.categoryId, product.id);
 

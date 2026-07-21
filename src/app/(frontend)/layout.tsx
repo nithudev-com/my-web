@@ -8,25 +8,26 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { SlideOutCart } from "@/components/SlideOutCart";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { LiveChatWidget } from "@/components/LiveChatWidget";
+const getCachedCategories = unstable_cache(
+  async () => {
+    const data = await prisma.category.findMany({
+      where: { parentId: null },
+      include: { children: { include: { children: true } } },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      take: 20
+    });
+    return JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+  },
+  ['layout-categories'],
+  { revalidate: 3600, tags: ['categories'] }
+);
+
 export default async function StoreLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const storeSettings = await getStoreSettings();
-  const getCachedCategories = unstable_cache(
-    async () => {
-      const data = await prisma.category.findMany({
-        where: { parentId: null },
-        include: { children: { include: { children: true } } },
-        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-        take: 20
-      });
-      return JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v));
-    },
-    ['layout-categories'],
-    { revalidate: 3600, tags: ['categories'] }
-  );
 
   const categories = await getCachedCategories();
 
