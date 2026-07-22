@@ -18,8 +18,7 @@ export default function CheckoutPage() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [formState, setFormState] = useState<CheckoutActionState>({ success: false });
 
-  // Accordion & Auto-Save State
-  const [activeStep, setActiveStep] = useState(1);
+  // Auto-Save State
   const [addressState, setAddressState] = useState<Record<string, string>>({});
   
   const formatPhone = (val: string) => {
@@ -351,22 +350,16 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <div className={`checkout-card accordion-card ${activeStep === 1 ? 'active' : ''}`} onClick={() => activeStep !== 1 && setActiveStep(1)}>
-              <h2 className={`checkout-title ${activeStep === 1 ? 'active-title' : ''}`}>
+            <div className="checkout-card accordion-card active">
+              <h2 className="checkout-title active-title">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '28px', height: '28px', background: activeStep >= 1 ? 'var(--co-pink)' : '#cbd5e1', color: 'white', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {activeStep > 1 ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    )}
+                  <span style={{ width: '28px', height: '28px', background: 'var(--co-pink)', color: 'white', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    1
                   </span>
                   Contact Information
                 </div>
-                {activeStep > 1 && <span style={{ fontSize: '13px', color: 'var(--co-pink)', fontWeight: '600' }}>Edit</span>}
               </h2>
-              {activeStep === 1 && (
-                <>
+              <>
                   <div className="checkout-grid full">
                     <div className="checkout-input-group">
                       <label className="checkout-label">Email Address *</label>
@@ -379,27 +372,19 @@ export default function CheckoutPage() {
                       {getError('phone')}
                     </div>
                   </div>
-                  <button type="button" className="checkout-button" onClick={() => { if(customerEmail && customerPhone) setActiveStep(2); else toast.error('Please fill out your contact info.') }} style={{ marginTop: '24px' }}>Continue to Shipping</button>
-                </>
-              )}
+              </>
             </div>
 
-            <div className={`checkout-card accordion-card ${activeStep === 2 ? 'active' : ''}`} onClick={() => activeStep !== 2 && setActiveStep(2)}>
-              <h2 className={`checkout-title ${activeStep === 2 ? 'active-title' : ''}`}>
+            <div className="checkout-card accordion-card active">
+              <h2 className="checkout-title active-title">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '28px', height: '28px', background: activeStep >= 2 ? 'var(--co-pink)' : '#cbd5e1', color: 'white', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {activeStep > 2 ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-                    )}
+                  <span style={{ width: '28px', height: '28px', background: 'var(--co-pink)', color: 'white', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    2
                   </span>
                   Shipping Details
                 </div>
-                {activeStep > 2 && <span style={{ fontSize: '13px', color: 'var(--co-pink)', fontWeight: '600' }}>Edit</span>}
               </h2>
-              {activeStep === 2 && (
-                <>
+              <>
                   {savedAddresses.length > 0 && (
                     <div className="checkout-input-group full" style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid var(--co-border)' }}>
                       <label className="checkout-label">Use Saved Address</label>
@@ -446,22 +431,19 @@ export default function CheckoutPage() {
                       ))
                     )}
                   </div>
-                  <button type="button" className="checkout-button" onClick={() => { if(selectedShippingId) setActiveStep(3); else toast.error('Please select a shipping method.') }} style={{ marginTop: '24px' }}>Continue to Payment</button>
-                </>
-              )}
+              </>
             </div>
 
-            <div className={`checkout-card accordion-card ${activeStep === 3 ? 'active' : ''}`} onClick={() => activeStep !== 3 && setActiveStep(3)}>
-              <h2 className={`checkout-title ${activeStep === 3 ? 'active-title' : ''}`}>
+            <div className="checkout-card accordion-card active">
+              <h2 className="checkout-title active-title">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '28px', height: '28px', background: activeStep >= 3 ? 'var(--co-pink)' : '#cbd5e1', color: 'white', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                  <span style={{ width: '28px', height: '28px', background: 'var(--co-pink)', color: 'white', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    3
                   </span>
                   Payment & Billing
                 </div>
               </h2>
-              {activeStep === 3 && (
-                <>
+              <>
                   <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>
                     All transactions are secure and encrypted. (Monirize Integration)
                   </p>
@@ -539,7 +521,6 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </>
-              )}
             </div>
 
           </form>
