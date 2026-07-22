@@ -12,6 +12,15 @@ import { ProductFilters } from "@/components/ProductFilters";
 export const revalidate = 1800;
 export const dynamicParams = true;
 
+export async function generateStaticParams() {
+  try {
+    const brands = await prisma.brand.findMany({ select: { slug: true } });
+    return brands.map((b) => ({ slug: b.slug }));
+  } catch (e) {
+    return [];
+  }
+}
+
 
 // Helper to get store name safely
 async function getStoreName() {
