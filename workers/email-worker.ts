@@ -11,6 +11,7 @@ const connection = new IORedis(redisUrl, { maxRetriesPerRequest: null });
 async function processEmailJob(bullJob: Job) {
   const { dbJobId } = bullJob.data;
 
+  await bullJob.updateProgress(10);
   // 1. Fetch DB Job
   const emailJob = await prisma.emailJob.findUnique({
     where: { id: BigInt(dbJobId) },
@@ -46,15 +47,18 @@ async function processEmailJob(bullJob: Job) {
     }
   }
 
+  await bullJob.updateProgress(30);
   // 3. Mark as PROCESSING
   await prisma.emailJob.update({
     where: { id: emailJob.id },
     data: { status: EmailStatus.PROCESSING, attemptCount: { increment: 1 } }
   });
 
+  await bullJob.updateProgress(50);
   // 4. Send Email
   const response = await emailProvider.sendEmail(emailJob, emailJob.template, emailJob.recipientEmail);
 
+  await bullJob.updateProgress(80);
   // 5. Update Status
   if (response.success) {
     await prisma.emailJob.update({
@@ -65,6 +69,7 @@ async function processEmailJob(bullJob: Job) {
         providerMsgId: response.messageId
       }
     });
+    await bullJob.updateProgress(100);
     return { success: true, messageId: response.messageId };
   } else {
     // Determine if we should fail or let BullMQ retry
@@ -98,3 +103,16 @@ emailWorker.on("failed", (job, err) => {
 });
 
 console.log("[EmailWorker] Started listening for email jobs on emailQueue...");
+
+// Graceful shutdown
+async function gracefulShutdown(signal: string) {
+  console.log(`Received ${signal}, closing EmailWorker...`);
+  await emailWorker.close();
+  connection.disconnect();
+  await prisma.$disconnect();
+  console.log('EmailWorker closed gracefully.');
+  process.exit(0);
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));

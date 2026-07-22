@@ -16,6 +16,7 @@ const nextConfig = {
   typedRoutes: false,
   productionBrowserSourceMaps: true,
   output: 'standalone',
+  serverExternalPackages: ['bullmq', 'ioredis', 'playwright'],
   staticPageGenerationTimeout: 300,
   experimental: {
     workerThreads: false,
