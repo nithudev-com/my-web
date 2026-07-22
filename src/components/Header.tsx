@@ -7,13 +7,18 @@ import { MegaMenu } from "./MegaMenu";
 import { useCartContext } from "@/context/CartContext";
 import { useWishlistContext } from "@/context/WishlistContext";
 
-export function Header({ settings, categories = [], isLoggedIn = false }: { settings: any, categories?: any[], isLoggedIn?: boolean }) {
+export function Header({ settings, categories = [] }: { settings: any, categories?: any[] }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const cart = useCartContext();
   const { wishlistIds } = useWishlistContext();
   const wishlistCount = wishlistIds.size;
+
+  useEffect(() => {
+    setIsLoggedIn(document.cookie.includes('customer_logged_in=1'));
+  }, []);
 
   const totalCartItems = cart.items.reduce((acc, item) => acc + item.quantity, 0);
 

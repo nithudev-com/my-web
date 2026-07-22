@@ -84,6 +84,14 @@ export async function customerLogin(formData: FormData) {
         sameSite: 'lax',
       });
       
+      cookieStore.set('customer_logged_in', '1', {
+        path: '/',
+        maxAge: maxAge,
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+      
       return { success: true };
     }
 
@@ -189,6 +197,13 @@ export async function customerRegister(formData: FormData) {
       sameSite: 'lax',
     });
 
+    cookieStore.set('customer_logged_in', '1', {
+      path: '/',
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
     return { success: true };
   } catch (error) {
     console.error('Registration error:', error);
@@ -199,4 +214,5 @@ export async function customerRegister(formData: FormData) {
 export async function customerLogout() {
   const cookieStore = await cookies();
   cookieStore.delete('customer_auth');
+  cookieStore.delete('customer_logged_in');
 }
