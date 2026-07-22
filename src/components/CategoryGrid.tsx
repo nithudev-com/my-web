@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
+import { shopifyLoader } from "@/lib/image-loader";
 
 const ACCENT_COLORS = [
   '#f43f5e', // Pink/Red
@@ -49,7 +50,7 @@ export function CategoryGrid({ categories }: { categories: any[] }) {
                           fill
                           sizes="100px"
                           style={{ objectFit: "contain", mixBlendMode: "multiply" }}
-                        />
+                         loader={shopifyLoader} />
                       ) : (
                         <span className="category-showcase-placeholder">
                           🏷️
