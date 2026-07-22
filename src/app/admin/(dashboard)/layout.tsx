@@ -1,12 +1,18 @@
 import Link from 'next/link';
 import { AdminHeader } from '@/components/admin/AdminHeader';
+import { requireAdminSession } from '@/lib/admin-auth';
+import { redirect } from 'next/navigation';
 import "@/styles/admin.css";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const admin = await requireAdminSession();
+  if (!admin) {
+    redirect('/admin/login');
+  }
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <aside style={{ 
@@ -69,6 +75,27 @@ export default function AdminLayout({
             <Link href="/admin/settings/taxes" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Taxes</Link>
             <Link href="/admin/settings/payment-gateways" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Payment Gateways</Link>
             <Link href="/admin/sitemaps" style={{ padding: '10px 14px', borderRadius: '8px', color: '#a5f3fc', fontWeight: '700' }}>🗺 Sitemaps & SEO</Link>
+          </nav>
+
+          <div className="muted" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', fontWeight: '700' }}>Google Merchant</div>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '24px' }}>
+            <Link href="/admin/google-merchant" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Overview</Link>
+            <Link href="/admin/google-merchant/connection" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Connection</Link>
+            <Link href="/admin/google-merchant/products" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Products</Link>
+            <Link href="/admin/google-merchant/product-issues" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Product Issues</Link>
+            <Link href="/admin/google-merchant/account-issues" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Account Issues</Link>
+            <Link href="/admin/google-merchant/data-sources" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Data Sources</Link>
+            <Link href="/admin/google-merchant/sync" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Sync Center</Link>
+            <Link href="/admin/google-merchant/field-mapping" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Field Mapping</Link>
+            <Link href="/admin/google-merchant/feed-rules" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Feed Rules</Link>
+            <Link href="/admin/google-merchant/promotions" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Promotions</Link>
+            <Link href="/admin/google-merchant/inventory" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Inventory</Link>
+            <Link href="/admin/google-merchant/shipping-returns" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Shipping & Returns</Link>
+            <Link href="/admin/google-merchant/performance" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Performance</Link>
+            <Link href="/admin/google-merchant/price-insights" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Price Insights</Link>
+            <Link href="/admin/google-merchant/notifications" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Notifications</Link>
+            <Link href="/admin/google-merchant/activity-logs" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Activity Logs</Link>
+            <Link href="/admin/google-merchant/settings" style={{ padding: '10px 14px', borderRadius: '8px', color: '#cbd5e1', fontWeight: '500' }}>Settings</Link>
           </nav>
           
           <div className="muted" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', fontWeight: '700' }}>Storefront</div>
