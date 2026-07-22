@@ -6,11 +6,7 @@ import { Footer } from "@/components/Footer";
 import { getStoreSettings } from "@/services/settings";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
-import dynamic from 'next/dynamic';
-
-const LiveChatWidget = dynamic(() => import('@/components/LiveChatWidget').then(mod => mod.LiveChatWidget), { ssr: false });
-const SlideOutCart = dynamic(() => import('@/components/SlideOutCart').then(mod => mod.SlideOutCart), { ssr: false });
+import { ClientDrawers } from '@/components/ClientDrawers';
 
 const getCachedCategories = unstable_cache(
   async () => {
@@ -64,9 +60,7 @@ export default async function StoreLayout({
         <Header settings={safeSettings} categories={safeCategories} />
         {children}
         <Footer settings={safeSettings} />
-        <SlideOutCart />
-        <MobileBottomNav />
-        <LiveChatWidget />
+        <ClientDrawers />
       </WishlistProvider>
     </CartProvider>
   );

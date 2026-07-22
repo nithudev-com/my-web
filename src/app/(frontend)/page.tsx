@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import { getHomeProducts } from "@/services/products";
 import { prisma } from "@/lib/prisma";
@@ -9,60 +10,65 @@ import { CategoryCircles } from "@/components/CategoryCircles";
 
 export const revalidate = 900;
 
-export async function getHomePageData(productIdsString: string) {
+const getFeaturedBrands = unstable_cache(
+  async () => {
+    const brands = await prisma.brand.findMany({
+      where: { showOnHome: true },
+      select: { id: true, name: true, slug: true, logo: true },
+      orderBy: { name: "asc" },
+      take: 20,
+    });
+    return JSON.parse(JSON.stringify(brands, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+  },
+  ['home-featured-brands'],
+  { revalidate: 900, tags: ['home-data', 'brand-slug'] }
+);
+
+const getFeaturedCategories = unstable_cache(
+  async () => {
+    const categories = await prisma.category.findMany({
+      where: { showOnHome: true },
+      select: { id: true, name: true, slug: true, image: true, seoTitle: true },
+      take: 16,
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+    return JSON.parse(JSON.stringify(categories, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+  },
+  ['home-featured-categories'],
+  { revalidate: 900, tags: ['home-data', 'category-slug'] }
+);
+
+const getCategoryCircles = unstable_cache(
+  async () => {
+    const circles = await prisma.categoryCircle.findMany({ orderBy: { sortOrder: "asc" } });
+    return JSON.parse(JSON.stringify(circles, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+  },
+  ['home-category-circles'],
+  { revalidate: 900, tags: ['home-data', 'category-slug'] }
+);
+
+const getReviewStats = async (productIdsString: string) => {
   return unstable_cache(
     async () => {
       const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
+      if (ids.length === 0) return [];
       
-      const reviewStats = ids.length > 0
-        ? await prisma.review.groupBy({
-            by: ["productId"],
-            where: { productId: { in: ids }, approved: true },
-            _avg: { rating: true },
-            _count: { rating: true },
-          })
-        : [];
-
-      const [brands, categories, circles] = await Promise.all([
-        prisma.brand.findMany({
-          where: { showOnHome: true },
-          select: { id: true, name: true, slug: true, logo: true },
-          orderBy: { name: "asc" },
-          take: 20,
-        }),
-        prisma.category.findMany({
-          where: { showOnHome: true },
-          select: { id: true, name: true, slug: true, image: true, seoTitle: true },
-          take: 16,
-          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-        }),
-        prisma.categoryCircle.findMany({ orderBy: { sortOrder: "asc" } }),
-      ]);
-
-      const serialize = (obj: any) => JSON.parse(JSON.stringify(obj, (k, v) => typeof v === 'bigint' ? v.toString() : v));
-      
-      return serialize({ reviewStats, brands, categories, circles });
+      const stats = await prisma.review.groupBy({
+        by: ["productId"],
+        where: { productId: { in: ids }, approved: true },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+      return JSON.parse(JSON.stringify(stats, (k, v) => typeof v === 'bigint' ? v.toString() : v));
     },
-    [`home-page-data-${productIdsString}`],
-    { revalidate: 900, tags: ['home-data'] }
+    [`home-review-stats-${productIdsString}`],
+    { revalidate: 900, tags: ['home-data', 'products'] }
   )();
-}
+};
 
-export default async function HomePage() {
-  const products = await getHomeProducts();
-
-  // --- ONE batched query for all review stats (replaces N+1 per-card DB calls) ---
-  const productIds = (products || [])
-    .map((p) => BigInt(p.id.toString()))
-    .filter(Boolean);
-
-  const productIdsString = productIds.join(',');
-  const { reviewStats, brands, categories, circles } = await getHomePageData(productIdsString);
-
-  const serializedBrands = brands.map((b: any) => ({ ...b, id: b.id.toString() }));
-  const serializedCategories = categories.map((c: any) => ({ ...c, id: c.id.toString() }));
-  const serializedCircles = circles.map((c: any) => ({ ...c, id: c.id.toString() }));
-
+async function BelowTheFoldContent({ productsPromise, reviewStatsPromise, categoriesPromise }: { productsPromise: Promise<any>, reviewStatsPromise: Promise<any>, categoriesPromise: Promise<any> }) {
+  const [products, reviewStats, categories] = await Promise.all([productsPromise, reviewStatsPromise, categoriesPromise]);
+  
   const reviewMap = new Map<string, any>(
     reviewStats.map((r: any) => [
       r.productId.toString(),
@@ -71,17 +77,12 @@ export default async function HomePage() {
   );
 
   return (
-    <main>
-      <BrandMarquee brands={serializedBrands} />
-      <HeroBanner />
-      <CategoryCircles items={serializedCircles} />
-
-      <CategoryGrid categories={serializedCategories} />
-
+    <>
+      <CategoryGrid categories={categories} />
       <div className="container">
         <h2>Latest Products</h2>
         <div className="grid">
-          {(products || []).map((product) => {
+          {(products || []).map((product: any) => {
             const id = product.id.toString();
             const stats = reviewMap.get(id);
             return (
@@ -90,12 +91,12 @@ export default async function HomePage() {
                 id={id}
                 title={product.title}
                 slug={product.slug}
-                image={product.mainImage || (product as any).images?.[0]?.imageUrl || ""}
+                image={product.mainImage || product.images?.[0]?.imageUrl || ""}
                 price={product.basePrice.toString()}
                 salePrice={product.salePrice?.toString()}
                 category={product.category?.name}
                 brand={product.brand?.name}
-                variantsCount={(product as any)._count?.variants || 0}
+                variantsCount={product._count?.variants || 0}
                 avgRating={stats?.avg ?? 0}
                 reviewCount={stats?.count ?? 0}
               />
@@ -103,6 +104,41 @@ export default async function HomePage() {
           })}
         </div>
       </div>
+    </>
+  );
+}
+
+export default async function HomePage() {
+  const productsPromise = getHomeProducts();
+  const brandsPromise = getFeaturedBrands();
+  const categoriesPromise = getFeaturedCategories();
+  const circlesPromise = getCategoryCircles();
+
+  const products = await productsPromise;
+  
+  const productIds = (products || [])
+    .map((p: any) => p.id.toString())
+    .filter(Boolean);
+  
+  const productIdsString = productIds.join(',');
+  const reviewsPromise = getReviewStats(productIdsString);
+
+  // We await only what's needed for the above-the-fold content here
+  const [brands, circles] = await Promise.all([brandsPromise, circlesPromise]);
+
+  return (
+    <main>
+      <BrandMarquee brands={brands} />
+      <HeroBanner />
+      <CategoryCircles items={circles} />
+
+      <Suspense fallback={<div className="container" style={{ padding: "40px 0", textAlign: "center", color: "#64748b" }}>Loading latest products and categories...</div>}>
+        <BelowTheFoldContent 
+          productsPromise={Promise.resolve(products)} 
+          reviewStatsPromise={reviewsPromise} 
+          categoriesPromise={categoriesPromise} 
+        />
+      </Suspense>
     </main>
   );
 }
