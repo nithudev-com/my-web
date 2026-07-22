@@ -3,6 +3,9 @@ import { revalidateTag, unstable_cache } from 'next/cache';
 
 const fetchSettings = async () => {
   try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("Missing DATABASE_URL");
+    }
     let settings = await prisma.storeSettings.findUnique({
       where: { id: 1 }
     });

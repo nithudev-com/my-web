@@ -14,11 +14,17 @@ export const metadata: Metadata = {
 };
 
 export default async function GlobalCategoryPage() {
-  // Fetch all categories
-  const allCategories = await prisma.category.findMany({
-    orderBy: { createdAt: 'asc' },
-    take: 64
-  });
+  let allCategories: any[] = [];
+  if (process.env.DATABASE_URL) {
+    try {
+      allCategories = await prisma.category.findMany({
+        orderBy: { createdAt: 'asc' },
+        take: 64
+      });
+    } catch {
+      allCategories = [];
+    }
+  }
 
   return (
     <main style={{ minHeight: '80vh', padding: '40px 0' }}>

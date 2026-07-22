@@ -27,14 +27,21 @@ export const metadata: Metadata = {
 };
 
 export default async function BrandIndexPage() {
-  const brands = await prisma.brand.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      _count: {
-        select: { products: { where: { status: 'ACTIVE' } } }
-      }
+  let brands: any[] = [];
+  if (process.env.DATABASE_URL) {
+    try {
+      brands = await prisma.brand.findMany({
+        orderBy: { name: 'asc' },
+        include: {
+          _count: {
+            select: { products: { where: { status: 'ACTIVE' } } }
+          }
+        }
+      });
+    } catch {
+      brands = [];
     }
-  });
+  }
 
   const bubbles = Array.from({ length: 30 }).map((_, i) => {
     // Generate static-like pseudo-random values to avoid hydration issues if it was a client component,
