@@ -14,7 +14,7 @@ export const dynamicParams = true;
 
 export async function generateStaticParams() {
   try {
-    const brands = await prisma.brand.findMany({ select: { slug: true } });
+    const brands = await prisma.brand.findMany({ select: { slug: true }, take: 20 });
     return brands.map((b) => ({ slug: b.slug }));
   } catch (e) {
     return [];

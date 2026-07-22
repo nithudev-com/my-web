@@ -226,7 +226,8 @@ export async function getSitemapProducts(skip: number, take: number) {
 export async function getSitemapCategories() {
   return prisma.category.findMany({
     select: { slug: true, updatedAt: true },
-    orderBy: { id: "asc" }
+    orderBy: { id: "asc" },
+    take: 20
   });
 }
 
