@@ -1,5 +1,7 @@
 'use server';
 
+import { requireCustomerSession } from '@/lib/customer-auth';
+
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
@@ -12,6 +14,9 @@ async function getCustomerId(): Promise<bigint | null> {
 }
 
 export async function updateProfile(formData: FormData) {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   const customerId = await getCustomerId();
   if (!customerId) return { success: false, error: 'Unauthorized' };
 
@@ -38,6 +43,9 @@ export async function updateProfile(formData: FormData) {
 }
 
 export async function updateSecurity(formData: FormData) {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   const customerId = await getCustomerId();
   if (!customerId) return { success: false, error: 'Unauthorized' };
 

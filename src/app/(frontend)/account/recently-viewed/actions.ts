@@ -1,5 +1,7 @@
 'use server';
 
+import { requireCustomerSession } from '@/lib/customer-auth';
+
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
@@ -7,6 +9,9 @@ const COOKIE_NAME = 'recently_viewed';
 const MAX_ITEMS = 20;
 
 export async function trackProductView(productId: string) {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   const cookieStore = await cookies();
   const existingCookie = cookieStore.get(COOKIE_NAME)?.value;
   
@@ -37,6 +42,9 @@ export async function trackProductView(productId: string) {
 }
 
 export async function clearRecentlyViewed() {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
   revalidatePath('/account/recently-viewed');

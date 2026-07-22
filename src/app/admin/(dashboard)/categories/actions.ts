@@ -1,9 +1,14 @@
 'use server';
 
+import { requireAdminSession } from '@/lib/admin-auth';
+
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function toggleCategoryHomeVisibility(id: string, showOnHome: boolean) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     await prisma.category.update({
       where: { id: BigInt(id) },
