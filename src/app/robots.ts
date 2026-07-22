@@ -68,6 +68,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/"],
       }
     ],
-    sitemap: siteUrl("/sitemap.xml"),
+    sitemap: "https://sextoyslovers.com/sitemap.xml",
   };
 }
