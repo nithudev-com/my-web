@@ -4,12 +4,19 @@ import { ProductCard } from '@/components/ProductCard';
 export const revalidate = 60; // ISR for performance
 
 export default async function NewReleasesPage() {
-  const latestProducts = await prisma.product.findMany({
-    where: { status: 'ACTIVE' },
-    orderBy: { createdAt: 'desc' },
-    take: 20,
-    include: { brand: true, category: true }
-  });
+  let latestProducts: any[] = [];
+  if (process.env.DATABASE_URL) {
+    try {
+      latestProducts = await prisma.product.findMany({
+        where: { status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        include: { brand: true, category: true }
+      });
+    } catch {
+      latestProducts = [];
+    }
+  }
 
   return (
     <div style={{ background: '#09090b', minHeight: '100vh', paddingBottom: '80px', color: '#fff', overflowX: 'hidden' }}>
