@@ -1,5 +1,6 @@
-import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
+
+import { requireAdminSession } from '@/lib/admin-auth';
 
 import { updateStoreSettings, getStoreSettings } from '@/services/settings';
 import { revalidatePath } from 'next/cache';

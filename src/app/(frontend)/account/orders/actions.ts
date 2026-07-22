@@ -1,5 +1,6 @@
-import { requireCustomerSession } from '@/lib/customer-auth';
 'use server';
+
+import { requireCustomerSession } from '@/lib/customer-auth';
 
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
