@@ -1,16 +1,20 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { getWishlistProductIds } from '@/app/(frontend)/account/wishlist/actions';
 
-type WishlistContextType = {
+type WishlistState = {
   wishlistIds: Set<string>;
-  addOptimisticId: (id: string) => void;
-  removeOptimisticId: (id: string) => void;
   isLoaded: boolean;
 };
 
-const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
+type WishlistActions = {
+  addOptimisticId: (id: string) => void;
+  removeOptimisticId: (id: string) => void;
+};
+
+export const WishlistStateContext = createContext<WishlistState | undefined>(undefined);
+export const WishlistActionsContext = createContext<WishlistActions | undefined>(undefined);
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
@@ -26,17 +30,19 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {}
     setIsLoaded(true);
 
-    // 2. Non-blocking background sync with server
-    getWishlistProductIds().then((ids) => {
-      if (ids.length > 0) {
-        setWishlistIds(prev => {
-          const newSet = new Set(prev);
-          ids.forEach(id => newSet.add(id.toString()));
-          localStorage.setItem('guest_wishlist', JSON.stringify([...newSet]));
-          return newSet;
-        });
-      }
-    }).catch(() => {});
+    // 2. Non-blocking background sync with server ONLY if authenticated
+    if (document.cookie.includes('customer_logged_in=1')) {
+      getWishlistProductIds().then((ids) => {
+        if (ids && ids.length > 0) {
+          setWishlistIds(prev => {
+            const newSet = new Set(prev);
+            ids.forEach(id => newSet.add(id.toString()));
+            localStorage.setItem('guest_wishlist', JSON.stringify([...newSet]));
+            return newSet;
+          });
+        }
+      }).catch(() => {});
+    }
 
     const handleWishlistUpdated = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -60,33 +66,46 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('wishlistUpdated', handleWishlistUpdated);
   }, []);
 
-  const addOptimisticId = (id: string) => {
+  const addOptimisticId = useCallback((id: string) => {
     setWishlistIds(prev => {
       const newSet = new Set(prev);
       newSet.add(id);
       return newSet;
     });
-  };
+  }, []);
 
-  const removeOptimisticId = (id: string) => {
+  const removeOptimisticId = useCallback((id: string) => {
     setWishlistIds(prev => {
       const newSet = new Set(prev);
       newSet.delete(id);
       return newSet;
     });
-  };
+  }, []);
+
+  const stateValue = useMemo(() => ({ wishlistIds, isLoaded }), [wishlistIds, isLoaded]);
+  const actionsValue = useMemo(() => ({ addOptimisticId, removeOptimisticId }), [addOptimisticId, removeOptimisticId]);
 
   return (
-    <WishlistContext.Provider value={{ wishlistIds, addOptimisticId, removeOptimisticId, isLoaded }}>
-      {children}
-    </WishlistContext.Provider>
+    <WishlistStateContext.Provider value={stateValue}>
+      <WishlistActionsContext.Provider value={actionsValue}>
+        {children}
+      </WishlistActionsContext.Provider>
+    </WishlistStateContext.Provider>
   );
 }
 
-export function useWishlistContext() {
-  const context = useContext(WishlistContext);
+export function useWishlistState() {
+  const context = useContext(WishlistStateContext);
   if (context === undefined) {
-    throw new Error('useWishlistContext must be used within a WishlistProvider');
+    throw new Error('useWishlistState must be used within a WishlistProvider');
+  }
+  return context;
+}
+
+export function useWishlistActions() {
+  const context = useContext(WishlistActionsContext);
+  if (context === undefined) {
+    throw new Error('useWishlistActions must be used within a WishlistProvider');
   }
   return context;
 }

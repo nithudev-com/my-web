@@ -1,15 +1,15 @@
 'use client';
 
 import React from 'react';
-import { useCartContext } from '@/context/CartContext';
+import { useCartActions } from '@/context/CartContext';
 
 export function AddToCartButton({ productId, variantId, outOfStock, mini = false, title, price, imageUrl }: { productId: string, variantId?: string, outOfStock?: boolean, mini?: boolean, title?: string, price?: number, imageUrl?: string }) {
-  const cart = useCartContext();
+  const cartActions = useCartActions();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    cart.addItem(productId, 1, variantId, title, price, imageUrl);
+    cartActions.addItem(productId, 1, variantId, title, price, imageUrl);
   };
 
   if (mini) {

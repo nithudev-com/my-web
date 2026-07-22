@@ -4,61 +4,62 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { shopifyLoader } from "@/lib/image-loader";
-import { useCartContext } from '@/context/CartContext';
+import { useCartState, useCartActions } from '@/context/CartContext';
 import { revalidateCartTotals, RevalidatedCart } from '@/app/(frontend)/checkout/cart-actions';
 import { FreeShippingBar } from './FreeShippingBar';
 
 export function SlideOutCart() {
-  const cart = useCartContext();
+  const cartState = useCartState();
+  const cartActions = useCartActions();
   const [validatedCart, setValidatedCart] = useState<RevalidatedCart | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [couponInput, setCouponInput] = useState(cart.couponCode || '');
+  const [couponInput, setCouponInput] = useState(cartState.couponCode || '');
 
   useEffect(() => {
-    setCouponInput(cart.couponCode || '');
-  }, [cart.couponCode]);
+    setCouponInput(cartState.couponCode || '');
+  }, [cartState.couponCode]);
 
   useEffect(() => {
-    if (cart.isCartOpen && cart.items.length > 0) {
+    if (cartState.isCartOpen && cartState.items.length > 0) {
       setIsLoading(true);
-      revalidateCartTotals(cart.items, undefined, cart.couponCode || undefined)
+      revalidateCartTotals(cartState.items, undefined, cartState.couponCode || undefined)
         .then((result) => {
           setValidatedCart(result);
           setIsLoading(false);
           
           // Auto-remove invalid items (e.g. products that were deleted or merged)
-          if (result.items.length < cart.items.length) {
-             const validItems = cart.items.filter(clientItem => 
+          if (result.items.length < cartState.items.length) {
+             const validItems = cartState.items.filter(clientItem => 
                result.items.some(serverItem => serverItem.productId === clientItem.productId && serverItem.variantId === clientItem.variantId)
              );
-             if (validItems.length !== cart.items.length) {
-               cart.syncItems(validItems);
+             if (validItems.length !== cartState.items.length) {
+               cartActions.syncItems(validItems);
              }
           }
 
           // Auto-remove invalid coupons
-          if (result.couponError && cart.couponCode) {
-            cart.setCouponCode(null);
+          if (result.couponError && cartState.couponCode) {
+            cartActions.setCouponCode(null);
           }
         })
         .catch(() => {
           setIsLoading(false);
         });
     }
-  }, [cart.isCartOpen, cart.items, cart.couponCode]);
+  }, [cartState.isCartOpen, cartState.items, cartState.couponCode]);
 
   if (!cart.isLoaded) return null;
 
   return (
     <>
       <div 
-        className={`slide-out-cart-overlay ${cart.isCartOpen ? 'open' : ''}`} 
-        onClick={cart.closeCart}
+        className={`slide-out-cart-overlay ${cartState.isCartOpen ? 'open' : ''}`} 
+        onClick={cartActions.closeCart}
       />
-      <div className={`slide-out-cart ${cart.isCartOpen ? 'open' : ''}`}>
+      <div className={`slide-out-cart ${cartState.isCartOpen ? 'open' : ''}`}>
         <div className="cart-drawer-header">
-          <h2>Your Cart ({cart.items.length})</h2>
-          <button aria-label="Close Cart" className="cart-drawer-close" onClick={cart.closeCart}>
+          <h2>Your Cart ({cartState.items.length})</h2>
+          <button aria-label="Close Cart" className="cart-drawer-close" onClick={cartActions.closeCart}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
@@ -78,21 +79,21 @@ export function SlideOutCart() {
         )}
 
         <div className="cart-drawer-items">
-          {cart.items.length === 0 ? (
+          {cartState.items.length === 0 ? (
             <div style={{ textAlign: 'center', marginTop: '40px', color: '#64748b' }}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ margin: '0 auto 16px', display: 'block' }}>
                 <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
               </svg>
               <p>Your cart is empty.</p>
               <button 
-                onClick={cart.closeCart} 
+                onClick={cartActions.closeCart} 
                 style={{ marginTop: '16px', background: 'none', border: 'none', color: '#D63062', fontWeight: 600, cursor: 'pointer' }}
               >
                 Continue Shopping
               </button>
             </div>
           ) : (
-            cart.items.map((cartItem, idx) => {
+            cartState.items.map((cartItem, idx) => {
               const validatedItem = validatedCart?.items.find(v => v.productId === cartItem.productId && v.variantId === cartItem.variantId);
               const title = validatedItem?.title || cartItem.title || 'Loading...';
               const price = validatedItem?.unitPrice || cartItem.price || 0;
@@ -114,15 +115,15 @@ export function SlideOutCart() {
                   {variantTitle && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>{variantTitle}</div>}
                   <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f1f5f9', borderRadius: '4px', padding: '2px 6px' }}>
-                      <button aria-label="Decrease quantity" onClick={() => cart.updateQuantity(cartItem.productId, cartItem.quantity - 1, cartItem.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>-</button>
+                      <button aria-label="Decrease quantity" onClick={() => cartActions.updateQuantity(cartItem.productId, cartItem.quantity - 1, cartItem.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>-</button>
                       <span style={{ fontSize: '14px', fontWeight: 600 }}>{cartItem.quantity}</span>
-                      <button aria-label="Increase quantity" onClick={() => cart.updateQuantity(cartItem.productId, cartItem.quantity + 1, cartItem.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>+</button>
+                      <button aria-label="Increase quantity" onClick={() => cartActions.updateQuantity(cartItem.productId, cartItem.quantity + 1, cartItem.variantId)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}>+</button>
                     </div>
                     <div style={{ fontWeight: 700 }}>${totalPrice.toFixed(2)}</div>
                   </div>
                 </div>
                 <button 
-                  onClick={() => cart.removeItem(cartItem.productId, cartItem.variantId)} 
+                  onClick={() => cartActions.removeItem(cartItem.productId, cartItem.variantId)} 
                   style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '4px', alignSelf: 'flex-start' }}
                   title="Remove item"
                   aria-label="Remove item"
@@ -137,10 +138,10 @@ export function SlideOutCart() {
 
         {validatedCart && validatedCart.items.length > 0 && (
           <div className="cart-drawer-footer">
-            {cart.couponCode ? (
+            {cartState.couponCode ? (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ecfdf5', color: '#059669', padding: '8px 12px', borderRadius: '8px', marginBottom: '16px', fontSize: '13px', fontWeight: 600 }}>
-                {validatedCart.couponMessage || `Code applied: ${cart.couponCode}`}
-                <button onClick={() => cart.setCouponCode(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 700, fontSize: '18px', padding: '0 4px' }}>×</button>
+                {validatedCart.couponMessage || `Code applied: ${cartState.couponCode}`}
+                <button onClick={() => cartActions.setCouponCode(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 700, fontSize: '18px', padding: '0 4px' }}>×</button>
               </div>
             ) : (
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
@@ -152,7 +153,7 @@ export function SlideOutCart() {
                   style={{ flex: 1, padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
                 />
                 <button 
-                  onClick={() => cart.setCouponCode(couponInput.trim())}
+                  onClick={() => cartActions.setCouponCode(couponInput.trim())}
                   disabled={!couponInput.trim() || isLoading}
                   style={{ background: '#1e293b', color: '#fff', border: 'none', borderRadius: '8px', padding: '0 16px', fontWeight: 600, cursor: 'pointer', opacity: (!couponInput.trim() || isLoading) ? 0.5 : 1 }}
                 >
@@ -178,7 +179,7 @@ export function SlideOutCart() {
               <span>${(validatedCart.totals.subtotal - validatedCart.totals.discount).toFixed(2)}</span>
             </div>
             
-            <Link prefetch={true} href="/checkout" className="cart-drawer-checkout" onClick={cart.closeCart} style={{ marginTop: '16px' }}>
+            <Link prefetch={true} href="/checkout" className="cart-drawer-checkout" onClick={cartActions.closeCart} style={{ marginTop: '16px' }}>
               Checkout Now
             </Link>
           </div>

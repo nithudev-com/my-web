@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { toggleWishlist } from '../../account/wishlist/actions';
 import { toast } from 'react-hot-toast';
-import { useWishlistContext } from '@/context/WishlistContext';
+import { useWishlistState, useWishlistActions } from '@/context/WishlistContext';
 
 export function WishlistButton({ productId, mini = false }: { productId: string, mini?: boolean }) {
-  const { wishlistIds, addOptimisticId, removeOptimisticId, isLoaded } = useWishlistContext();
+  const { wishlistIds, isLoaded } = useWishlistState();
+  const { addOptimisticId, removeOptimisticId } = useWishlistActions();
   const inWishlist = wishlistIds.has(productId);
 
   const handleToggle = async (e?: React.MouseEvent) => {

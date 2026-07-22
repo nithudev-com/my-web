@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 export type CartItemInput = {
   productId: string;
@@ -11,10 +11,14 @@ export type CartItemInput = {
   imageUrl?: string;
 };
 
-type CartContextType = {
+type CartState = {
   items: CartItemInput[];
   isLoaded: boolean;
   isCartOpen: boolean;
+  couponCode: string | null;
+};
+
+type CartActions = {
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   removeItem: (productId: string, variantId?: string) => void;
   addItem: (productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string, skipOpenCart?: boolean) => void;
@@ -22,11 +26,11 @@ type CartContextType = {
   syncItems: (items: CartItemInput[]) => void;
   openCart: () => void;
   closeCart: () => void;
-  couponCode: string | null;
   setCouponCode: (code: string | null) => void;
 };
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+export const CartStateContext = createContext<CartState | undefined>(undefined);
+export const CartActionsContext = createContext<CartActions | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItemInput[]>([]);
@@ -50,74 +54,93 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsLoaded(true);
   }, []);
 
-  const setCouponCode = (code: string | null) => {
+  const setCouponCode = useCallback((code: string | null) => {
     setCouponCodeState(code);
     if (code) {
       localStorage.setItem('speed_cart_coupon', code);
     } else {
       localStorage.removeItem('speed_cart_coupon');
     }
-  };
+  }, []);
 
-  const saveCart = (newItems: CartItemInput[]) => {
+  const saveCart = useCallback((newItems: CartItemInput[]) => {
     setItems(newItems);
     localStorage.setItem('speed_cart', JSON.stringify(newItems));
-  };
+  }, []);
 
-  const updateQuantity = (productId: string, quantity: number, variantId?: string) => {
+  const updateQuantity = useCallback((productId: string, quantity: number, variantId?: string) => {
     if (quantity < 1) return;
-    const newItems = items.map(item => {
-      if (item.productId === productId && item.variantId === variantId) {
-        return { ...item, quantity };
-      }
-      return item;
+    setItems(prevItems => {
+      const newItems = prevItems.map(item => {
+        if (item.productId === productId && item.variantId === variantId) {
+          return { ...item, quantity };
+        }
+        return item;
+      });
+      localStorage.setItem('speed_cart', JSON.stringify(newItems));
+      return newItems;
     });
-    saveCart(newItems);
-  };
+  }, []);
 
-  const removeItem = (productId: string, variantId?: string) => {
-    const newItems = items.filter(item => !(item.productId === productId && item.variantId === variantId));
-    saveCart(newItems);
-  };
+  const removeItem = useCallback((productId: string, variantId?: string) => {
+    setItems(prevItems => {
+      const newItems = prevItems.filter(item => !(item.productId === productId && item.variantId === variantId));
+      localStorage.setItem('speed_cart', JSON.stringify(newItems));
+      return newItems;
+    });
+  }, []);
 
-  const addItem = (productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string, skipOpenCart?: boolean) => {
-    const existingIndex = items.findIndex(item => item.productId === productId && item.variantId === variantId);
-    if (existingIndex >= 0) {
-      const newItems = [...items];
-      newItems[existingIndex].quantity += quantity;
-      // Update with latest metadata if provided
-      if (title) newItems[existingIndex].title = title;
-      if (price !== undefined) newItems[existingIndex].price = price;
-      if (imageUrl) newItems[existingIndex].imageUrl = imageUrl;
-      saveCart(newItems);
-    } else {
-      saveCart([...items, { productId, variantId, quantity, title, price, imageUrl }]);
-    }
+  const addItem = useCallback((productId: string, quantity: number, variantId?: string, title?: string, price?: number, imageUrl?: string, skipOpenCart?: boolean) => {
+    setItems(prevItems => {
+      const newItems = [...prevItems];
+      const existingIndex = newItems.findIndex(item => item.productId === productId && item.variantId === variantId);
+      if (existingIndex >= 0) {
+        newItems[existingIndex].quantity += quantity;
+        if (title) newItems[existingIndex].title = title;
+        if (price !== undefined) newItems[existingIndex].price = price;
+        if (imageUrl) newItems[existingIndex].imageUrl = imageUrl;
+      } else {
+        newItems.push({ productId, variantId, quantity, title, price, imageUrl });
+      }
+      localStorage.setItem('speed_cart', JSON.stringify(newItems));
+      return newItems;
+    });
     if (!skipOpenCart) {
-      setIsCartOpen(true); // Automatically open the slide-out cart when adding
+      setIsCartOpen(true);
     }
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     saveCart([]);
-  };
+  }, [saveCart]);
 
-  const openCart = () => setIsCartOpen(true);
-  const closeCart = () => setIsCartOpen(false);
+  const openCart = useCallback(() => setIsCartOpen(true), []);
+  const closeCart = useCallback(() => setIsCartOpen(false), []);
+
+  const stateValue = useMemo(() => ({ items, isLoaded, isCartOpen, couponCode }), [items, isLoaded, isCartOpen, couponCode]);
+  const actionsValue = useMemo(() => ({ updateQuantity, removeItem, addItem, clearCart, syncItems: saveCart, openCart, closeCart, setCouponCode }), [updateQuantity, removeItem, addItem, clearCart, saveCart, openCart, closeCart, setCouponCode]);
 
   return (
-    <CartContext.Provider value={{
-      items, isLoaded, isCartOpen, updateQuantity, removeItem, addItem, clearCart, syncItems: saveCart, openCart, closeCart, couponCode, setCouponCode
-    }}>
-      {children}
-    </CartContext.Provider>
+    <CartStateContext.Provider value={stateValue}>
+      <CartActionsContext.Provider value={actionsValue}>
+        {children}
+      </CartActionsContext.Provider>
+    </CartStateContext.Provider>
   );
 }
 
-export function useCartContext() {
-  const context = useContext(CartContext);
+export function useCartState() {
+  const context = useContext(CartStateContext);
   if (context === undefined) {
-    throw new Error('useCartContext must be used within a CartProvider');
+    throw new Error('useCartState must be used within a CartProvider');
+  }
+  return context;
+}
+
+export function useCartActions() {
+  const context = useContext(CartActionsContext);
+  if (context === undefined) {
+    throw new Error('useCartActions must be used within a CartProvider');
   }
   return context;
 }
