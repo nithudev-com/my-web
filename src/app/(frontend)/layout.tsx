@@ -15,7 +15,29 @@ const getCachedCategories = unstable_cache(
   async () => {
     const data = await prisma.category.findMany({
       where: { parentId: null },
-      include: { children: { include: { children: true } } },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        image: true,
+        children: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            image: true,
+            children: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              },
+              orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
+            }
+          },
+          orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
+        }
+      },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       take: 20
     });

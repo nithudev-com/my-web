@@ -4,8 +4,8 @@ import {
   HeaderAuthButton, 
   HeaderWishlistButton, 
   HeaderCartButton, 
-  DesktopBottomNav, 
-  MobileHeaderWrapper 
+  DesktopMegaMenuTrigger, 
+  MobileMenuTrigger 
 } from "./HeaderClientIslands";
 
 export function Header({ settings, categories = [] }: { settings: any, categories?: any[] }) {
@@ -42,11 +42,33 @@ export function Header({ settings, categories = [] }: { settings: any, categorie
         </div>
 
         {/* 3. Bottom Navigation */}
-        <DesktopBottomNav categories={categories} />
+        <nav className="bottom-nav-bar" style={{ position: 'relative' }}>
+          <DesktopMegaMenuTrigger categories={categories} />
+          <div className="bottom-nav-links">
+            <Link prefetch={true} href="/deals">Today's Deals</Link>
+            <Link prefetch={true} href="/new-releases">New Releases</Link>
+            <Link prefetch={true} href="/brand">Brands</Link>
+            <Link prefetch={true} href="/category">Categories</Link>
+            <Link prefetch={true} href="/blog">Blog</Link>
+            <Link prefetch={true} href="/contact">Customer Service</Link>
+          </div>
+        </nav>
       </header>
 
       {/* --- MOBILE HEADER & DRAWER --- */}
-      <MobileHeaderWrapper settings={settings} categories={categories} />
+      <header className="mobile-header mobile-header-wrapper">
+        <div className="mobile-header-top">
+          <MobileMenuTrigger categories={categories} />
+          
+          <Link prefetch={true} href="/" className="mobile-logo" style={{ display: 'flex', alignItems: 'center' }}>
+            <img src="/logo-new.png" alt={settings.storeName || "SexToys Lovers"} style={{ maxHeight: '36px', width: 'auto' }} />
+          </Link>
+
+          <HeaderCartButton />
+        </div>
+
+        <AutocompleteSearch isMobile={true} categories={categories} />
+      </header>
     </>
   );
 }
