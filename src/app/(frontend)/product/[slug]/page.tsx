@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export async function getRelatedProducts(categoryId: string | bigint | null, excludeId: string | bigint) {
+async function getRelatedProducts(categoryId: string | bigint | null, excludeId: string | bigint) {
   if (!categoryId) return [];
   return unstable_cache(
     async () => {

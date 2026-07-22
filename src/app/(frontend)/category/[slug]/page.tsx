@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export async function getCategoryPageData(categoryId: string | bigint, productIdsString: string) {
+async function getCategoryPageData(categoryId: string | bigint, productIdsString: string) {
   return unstable_cache(
     async () => {
       const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];

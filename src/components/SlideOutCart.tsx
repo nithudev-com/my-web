@@ -48,7 +48,7 @@ export function SlideOutCart() {
     }
   }, [cartState.isCartOpen, cartState.items, cartState.couponCode]);
 
-  if (!cart.isLoaded) return null;
+  if (!cartState.isLoaded) return null;
 
   return (
     <>

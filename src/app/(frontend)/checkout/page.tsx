@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { processCheckout, CheckoutActionState, getCustomerCheckoutInfo } from './actions';
-import { useCart } from '@/hooks/useCart';
+import { useCartState, useCartActions } from '@/context/CartContext';
 import { revalidateCartTotals, RevalidatedCart, getShippingOptions, ShippingOption } from './cart-actions';
 import { toast } from 'react-hot-toast';
 
@@ -61,7 +61,9 @@ export default function CheckoutPage() {
   const [couponLoading, setCouponLoading] = useState(false);
 
   // Cart State
-  const cart = useCart();
+  const cartState = useCartState();
+  const cartActions = useCartActions();
+  const cart = { ...cartState, ...cartActions };
   const [validatedCart, setValidatedCart] = useState<RevalidatedCart | null>(null);
   const [cartLoading, setCartLoading] = useState(false);
 

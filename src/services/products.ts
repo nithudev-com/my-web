@@ -65,7 +65,7 @@ export async function getProductBySlug(slug: string) {
           category: { select: { id: true, name: true, slug: true } },
           brand: { select: { id: true, name: true, slug: true } },
           images: { select: { id: true, imageUrl: true, altText: true, sortOrder: true }, orderBy: { sortOrder: "asc" } },
-          variants: { select: { id: true, sku: true, barcode: true, title: true, price: true, salePrice: true, stockQuantity: true, image: true, attributes: true } },
+          variants: { select: { id: true, sku: true, barcode: true, price: true, salePrice: true, stockQuantity: true, image: true, attributes: true } },
           reviews: { select: { id: true, rating: true, title: true, body: true, author: true, createdAt: true }, where: { approved: true }, take: 10, orderBy: { createdAt: "desc" } },
           blogs: { 
             where: { isPublished: true }, 
