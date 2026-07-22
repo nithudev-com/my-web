@@ -233,8 +233,25 @@ model Customer {
   emailPreferences     EmailPreference?
   wishlist             Wishlist?
   notifications        Notification[]
+  sessions             CustomerSession[]
 
   @@index([email])
+}
+
+model CustomerSession {
+  id            String    @id @default(cuid())
+  tokenHash     String    @unique
+  customerId    BigInt
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  lastUsedAt    DateTime  @default(now())
+  ipHash        String?
+  userAgentHash String?
+  customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([tokenHash])
 }
 
 model CustomerAddress {
@@ -574,15 +591,309 @@ enum EmailStatus {
 }
 
 model Notification {
-  id        BigInt   @id @default(autoincrement())
-  customerId    BigInt
-  customer Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  title     String
-  message   String
-  read      Boolean  @default(false)
-  link      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         BigInt   @id @default(autoincrement())
+  customerId BigInt
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title      String
+  message    String
+  read       Boolean  @default(false)
+  link       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([customerId, read])
+}
+
+model AdminUser {
+  id           BigInt         @id @default(autoincrement())
+  email        String         @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+}
+
+model AdminSession {
+  id            String    @id @default(cuid())
+  tokenHash     String    @unique
+  adminId       BigInt
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  lastUsedAt    DateTime  @default(now())
+  ipHash        String?
+  userAgentHash String?
+  admin         AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([tokenHash])
+}
+
+model GoogleMerchantConnection {
+  id                      BigInt    @id @default(autoincrement())
+  merchantAccountId       String    @unique
+  merchantAccountName     String?
+  googleUserEmail         String?
+  encryptedRefreshToken   String?
+  grantedScopes           String?
+  status                  String    @default("PENDING")
+  apiVersion              String    @default("v1")
+  connectedByAdminId      BigInt?
+  connectedAt             DateTime  @default(now())
+  lastSuccessfulRequestAt DateTime?
+  lastFailedRequestAt     DateTime?
+  disconnectedAt          DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  dataSources        GoogleMerchantDataSource[]
+  configurations     GoogleProductConfiguration[]
+  statuses           GoogleProductStatus[]
+  issues             GoogleMerchantIssue[]
+  syncJobs           GoogleMerchantSyncJob[]
+  mappings           GoogleMerchantMapping[]
+  rules              GoogleMerchantRule[]
+  reportSnapshots    GoogleMerchantReportSnapshot[]
+  notificationEvents GoogleMerchantNotificationEvent[]
+  auditLogs          GoogleMerchantAuditLog[]
+
+  @@index([merchantAccountId])
+}
+
+model GoogleMerchantDataSource {
+  id                 BigInt                   @id @default(autoincrement())
+  connectionId       BigInt
+  googleResourceName String?                  @unique
+  displayName        String
+  sourceType         String
+  feedLabel          String?
+  language           String?
+  countries          String?
+  inputMethod        String?
+  status             String                   @default("PENDING")
+  lastUploadAt       DateTime?
+  lastProcessedAt    DateTime?
+  rawMetadata        Json?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  connection         GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+}
+
+model GoogleProductConfiguration {
+  id                       BigInt                   @id @default(autoincrement())
+  productId                BigInt                   @unique
+  connectionId             BigInt
+  enabled                  Boolean                  @default(false)
+  offerId                  String?                  @unique
+  targetCountry            String?
+  contentLanguage          String?
+  feedLabel                String?
+  condition                String?
+  googleProductCategory    String?
+  productType              String?
+  titleOverride            String?
+  descriptionOverride      String?
+  imageOverride            String?
+  customLabels             Json?
+  excludedMarketingMethods Json?
+  includedMarketingMethods Json?
+  lastSubmittedAt          DateTime?
+  lastProcessedAt          DateTime?
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  connection               GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([productId])
+  @@index([offerId])
+}
+
+model GoogleProductStatus {
+  id                    BigInt                   @id @default(autoincrement())
+  productId             BigInt                   @unique
+  connectionId          BigInt
+  offerId               String?
+  productInputName      String?
+  processedProductName  String?
+  approvalState         String?
+  processingState       String?
+  reportingContexts     Json?
+  processedPrice        Decimal?                 @db.Decimal(12, 2)
+  processedAvailability String?
+  expirationDate        DateTime?
+  issueCount            Int                      @default(0)
+  lastFetchedAt         DateTime?
+  rawSnapshot           Json?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  connection            GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([productId])
+  @@index([offerId])
+  @@index([approvalState])
+}
+
+model GoogleMerchantIssue {
+  id               BigInt                   @id @default(autoincrement())
+  connectionId     BigInt
+  productId        BigInt?
+  googleIssueCode  String
+  issueType        String
+  severity         String
+  title            String
+  description      String?
+  country          String?
+  reportingContext String?
+  documentationUrl String?
+  firstDetectedAt  DateTime?
+  lastDetectedAt   DateTime?
+  deadline         DateTime?
+  status           String                   @default("ACTIVE")
+  rawPayload       Json?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  connection       GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([productId])
+  @@index([severity])
+  @@index([status])
+}
+
+model GoogleMerchantSyncJob {
+  id                 BigInt                   @id @default(autoincrement())
+  connectionId       BigInt
+  jobType            String
+  scope              String?
+  status             String                   @default("QUEUED")
+  totalItems         Int                      @default(0)
+  processedItems     Int                      @default(0)
+  successItems       Int                      @default(0)
+  warningItems       Int                      @default(0)
+  failedItems        Int                      @default(0)
+  requestedByAdminId BigInt?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  errorSummary       String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  connection         GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  items              GoogleMerchantSyncItem[]
+
+  @@index([connectionId])
+  @@index([status])
+}
+
+model GoogleMerchantSyncItem {
+  id              BigInt                @id @default(autoincrement())
+  syncJobId       BigInt
+  productId       BigInt?
+  offerId         String?
+  operation       String
+  status          String                @default("PENDING")
+  attemptCount    Int                   @default(0)
+  googleRequestId String?
+  errorCode       String?
+  errorMessage    String?
+  submittedAt     DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  syncJob         GoogleMerchantSyncJob @relation(fields: [syncJobId], references: [id], onDelete: Cascade)
+
+  @@index([syncJobId])
+  @@index([productId])
+  @@index([status])
+}
+
+model GoogleMerchantMapping {
+  id             BigInt                   @id @default(autoincrement())
+  connectionId   BigInt
+  googleField    String
+  sourceType     String
+  sourceValue    String?
+  fallbackValue  String?
+  transformation String?
+  priority       Int                      @default(0)
+  active         Boolean                  @default(true)
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  connection     GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([googleField])
+}
+
+model GoogleMerchantRule {
+  id               BigInt                   @id @default(autoincrement())
+  connectionId     BigInt
+  name             String
+  priority         Int                      @default(0)
+  conditions       Json?
+  actions          Json?
+  active           Boolean                  @default(true)
+  createdByAdminId BigInt?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  connection       GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([active])
+}
+
+model GoogleMerchantReportSnapshot {
+  id           BigInt                   @id @default(autoincrement())
+  connectionId BigInt
+  reportType   String
+  reportDate   DateTime
+  dimensions   Json?
+  metrics      Json?
+  createdAt    DateTime                 @default(now())
+  connection   GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([reportType])
+  @@index([reportDate])
+}
+
+model GoogleMerchantNotificationEvent {
+  id               BigInt                   @id @default(autoincrement())
+  connectionId     BigInt
+  subscriptionName String?
+  eventType        String
+  eventHash        String                   @unique
+  status           String                   @default("PENDING")
+  receivedAt       DateTime                 @default(now())
+  processedAt      DateTime?
+  errorMessage     String?
+  rawPayload       Json?
+  connection       GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([eventHash])
+  @@index([status])
+}
+
+model GoogleMerchantAuditLog {
+  id           BigInt                   @id @default(autoincrement())
+  connectionId BigInt
+  adminId      BigInt?
+  action       String
+  resourceType String?
+  resourceId   String?
+  beforeData   Json?
+  afterData    Json?
+  status       String                   @default("SUCCESS")
+  requestId    String?
+  createdAt    DateTime                 @default(now())
+  connection   GoogleMerchantConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([action])
+  @@index([resourceType])
 }
