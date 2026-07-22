@@ -1,9 +1,13 @@
+import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function adminReplyMessage(formData: FormData) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const conversationIdStr = formData.get('conversationId') as string;
     const message = formData.get('message') as string;
@@ -44,6 +48,9 @@ export async function adminReplyMessage(formData: FormData) {
 }
 
 export async function updateConversationStatus(formData: FormData) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const conversationIdStr = formData.get('conversationId') as string;
     const status = formData.get('status') as any;

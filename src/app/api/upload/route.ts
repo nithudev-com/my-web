@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
-import { cookies } from 'next/headers';
+import { requireAdminSession } from '@/lib/admin-auth';
 
 // Configure Cloudinary using Environment Variables for Security
 cloudinary.config({
@@ -12,9 +12,8 @@ cloudinary.config({
 export async function POST(request: Request) {
   try {
     // SECURITY CHECK: Verify the user is an authenticated admin
-    const cookieStore = await cookies();
-    const authCookie = cookieStore.get('admin_auth');
-    if (!authCookie || authCookie.value !== 'true') {
+    const admin = await requireAdminSession();
+    if (!admin) {
       return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 401 });
     }
 

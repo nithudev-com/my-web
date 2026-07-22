@@ -1,9 +1,13 @@
+import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function bulkUpdateInventory(productIds: string[], newQuantity: number) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   if (!productIds || productIds.length === 0) return { success: false, error: 'No products selected' };
   
   try {
@@ -23,6 +27,9 @@ export async function bulkUpdateInventory(productIds: string[], newQuantity: num
 }
 
 export async function bulkUpdatePricePercentage(productIds: string[], percentage: number) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   if (!productIds || productIds.length === 0) return { success: false, error: 'No products selected' };
   if (percentage === 0) return { success: true };
 
@@ -58,6 +65,9 @@ export async function bulkUpdatePricePercentage(productIds: string[], percentage
 }
 
 export async function getProductsListForAI() {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const products = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
@@ -107,6 +117,9 @@ export async function saveProductDataForAI(id: string, data: {
   tags?: any;
   images?: any;
 }) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const updateData: any = {
       seoTitle: data.seoTitle,
@@ -154,6 +167,9 @@ export async function saveGeneratedBlog(sourceProductId: string, data: {
   coverImage?: string;
   isPublished?: boolean;
 }) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     let finalSlug = data.slug;
     

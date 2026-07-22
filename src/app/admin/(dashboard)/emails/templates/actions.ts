@@ -1,3 +1,4 @@
+import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
@@ -5,6 +6,9 @@ import DOMPurify from 'isomorphic-dompurify';
 import { EmailChannel } from '@prisma/client';
 
 export async function saveTemplate(formData: FormData) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   const id = formData.get('id') as string | null;
   const name = formData.get('name') as string;
   const subject = formData.get('subject') as string;
@@ -42,6 +46,9 @@ export async function saveTemplate(formData: FormData) {
 }
 
 export async function deleteTemplate(id: string) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     await prisma.emailTemplate.delete({
       where: { id: BigInt(id) }

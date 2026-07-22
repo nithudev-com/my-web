@@ -1,3 +1,4 @@
+import { requireCustomerSession } from '@/lib/customer-auth';
 'use server';
 
 import { prisma } from '@/lib/prisma';
@@ -5,6 +6,9 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
 export async function buyAgain(productId: bigint, variantId: bigint | null) {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   const cookieStore = await cookies();
   const customerAuth = cookieStore.get('customer_auth')?.value;
   

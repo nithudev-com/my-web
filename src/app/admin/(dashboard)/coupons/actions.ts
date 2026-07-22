@@ -1,9 +1,13 @@
+import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function getCoupons() {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const coupons = await prisma.coupon.findMany({
       orderBy: { createdAt: 'desc' }
@@ -33,6 +37,9 @@ export async function saveCoupon(data: {
   expiresAt?: string;
   isActive: boolean;
 }) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const minOrderVal = data.minOrderValue && parseFloat(data.minOrderValue) > 0 ? parseFloat(data.minOrderValue) : null;
     const expiresDate = data.expiresAt ? new Date(data.expiresAt) : null;
@@ -80,6 +87,9 @@ export async function saveCoupon(data: {
 }
 
 export async function deleteCoupon(id: string) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     await prisma.coupon.delete({
       where: { id: BigInt(id) }

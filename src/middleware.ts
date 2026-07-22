@@ -5,8 +5,8 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith('/admin')) {
-    const authCookie = request.cookies.get('admin_auth');
-    const isAuthenticated = authCookie && authCookie.value === 'true';
+    const authCookie = request.cookies.get('admin_session');
+    const isAuthenticated = !!authCookie?.value;
 
     if (pathname === '/admin/login') {
       if (isAuthenticated) {
@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith('/account')) {
-    const customerAuth = request.cookies.get('customer_auth');
+    const customerAuth = request.cookies.get('customer_session');
     const isCustomerAuthenticated = !!customerAuth?.value;
 
     if (!isCustomerAuthenticated) {

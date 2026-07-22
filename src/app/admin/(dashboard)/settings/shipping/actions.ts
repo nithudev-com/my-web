@@ -1,9 +1,13 @@
+import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function createShippingMethod(formData: FormData) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const name = formData.get('name') as string;
     const priceStr = formData.get('price') as string;
@@ -26,6 +30,9 @@ export async function createShippingMethod(formData: FormData) {
 }
 
 export async function updateShippingMethod(id: string, formData: FormData) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const name = formData.get('name') as string;
     const priceStr = formData.get('price') as string;
@@ -49,6 +56,9 @@ export async function updateShippingMethod(id: string, formData: FormData) {
 }
 
 export async function toggleShippingStatus(id: string, isActive: boolean) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     await prisma.shippingMethod.update({
       where: { id: BigInt(id) },
@@ -63,6 +73,9 @@ export async function toggleShippingStatus(id: string, isActive: boolean) {
 }
 
 export async function deleteShippingMethod(id: string) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     await prisma.shippingMethod.delete({
       where: { id: BigInt(id) }

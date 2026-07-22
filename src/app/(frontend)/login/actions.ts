@@ -6,6 +6,9 @@ import bcrypt from 'bcryptjs';
 import { queueEmail } from '@/lib/email/queue';
 import { EmailChannel } from '@prisma/client';
 import { emailProvider } from '@/lib/email/provider';
+import { createCustomerSession, revokeCustomerSession } from '@/lib/customer-auth';
+import { rateLimit } from '@/lib/rate-limit';
+import { headers } from 'next/headers';
 
 export async function sendRegistrationOtp(email: string, firstName: string) {
   try {
@@ -59,6 +62,17 @@ export async function customerLogin(formData: FormData) {
     return { success: false, error: 'Email and password are required' };
   }
 
+  // Rate limiting (max 10 attempts per 15 minutes per IP)
+  const headersList = await headers();
+  const ip = headersList.get('x-forwarded-for') || '127.0.0.1';
+  const crypto = await import('crypto');
+  const ipHash = crypto.createHash('sha256').update(ip).digest('hex');
+  
+  const rateLimitResult = await rateLimit(`customer-login:${ipHash}`, 10, 900);
+  if (!rateLimitResult.success) {
+    return { success: false, error: 'Too many login attempts. Please try again later.' };
+  }
+
   try {
     const customer = await prisma.customer.findUnique({
       where: { email: email.toLowerCase() },
@@ -71,27 +85,7 @@ export async function customerLogin(formData: FormData) {
     const isMatch = await bcrypt.compare(password, customer.passwordHash);
 
     if (isMatch) {
-      const cookieStore = await cookies();
-      
-      // If remember me is checked, session lasts 30 days, else session cookie (expires on close)
-      const maxAge = rememberMe ? 30 * 24 * 60 * 60 : undefined;
-      
-      cookieStore.set('customer_auth', customer.id.toString(), {
-        path: '/',
-        maxAge: maxAge,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-      });
-      
-      cookieStore.set('customer_logged_in', '1', {
-        path: '/',
-        maxAge: maxAge,
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-      });
-      
+      await createCustomerSession(customer.id, rememberMe);
       return { success: true };
     }
 
@@ -189,20 +183,7 @@ export async function customerRegister(formData: FormData) {
     }
 
     // Automatically log in the new user
-    const cookieStore = await cookies();
-    cookieStore.set('customer_auth', customer.id.toString(), {
-      path: '/',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
-
-    cookieStore.set('customer_logged_in', '1', {
-      path: '/',
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
+    await createCustomerSession(customer.id, true);
 
     return { success: true };
   } catch (error) {
@@ -212,7 +193,5 @@ export async function customerRegister(formData: FormData) {
 }
 
 export async function customerLogout() {
-  const cookieStore = await cookies();
-  cookieStore.delete('customer_auth');
-  cookieStore.delete('customer_logged_in');
+  await revokeCustomerSession();
 }

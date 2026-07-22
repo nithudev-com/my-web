@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
+import { requireAdminSession } from '@/lib/admin-auth';
 
 const FAKE_NAMES = ['John D.', 'Sarah M.', 'Alex K.', 'Emily R.', 'Michael T.', 'Jessica L.', 'David W.', 'Amanda B.', 'Chris P.', 'Samantha C.'];
 const FAKE_TITLES = ['Great product!', 'Highly recommended', 'Exceeded expectations', 'Good quality', 'Very satisfied', 'Awesome purchase', 'Not bad', 'Exactly as described', 'Love it!', '5 stars'];
@@ -23,9 +23,8 @@ function getRandom<T>(arr: T[]): T {
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const isAdmin = cookieStore.get('admin_auth')?.value === 'true';
-    if (!isAdmin) {
+    const admin = await requireAdminSession();
+    if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

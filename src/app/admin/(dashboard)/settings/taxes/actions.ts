@@ -1,9 +1,13 @@
+import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
 
 import { updateStoreSettings, getStoreSettings } from '@/services/settings';
 import { revalidatePath } from 'next/cache';
 
 export async function getTaxSettings() {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   const settings = await getStoreSettings();
   return {
     taxEnabled: settings.taxEnabled,
@@ -17,6 +21,9 @@ export async function saveTaxConfiguration(data: {
   taxIncludedInPrices: boolean;
   taxRate: number;
 }) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const res = await updateStoreSettings({
       taxEnabled: data.taxEnabled,

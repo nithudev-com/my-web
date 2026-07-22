@@ -1,3 +1,4 @@
+import { requireCustomerSession } from '@/lib/customer-auth';
 'use server';
 
 import { prisma } from '@/lib/prisma';
@@ -12,6 +13,9 @@ async function getCustomerId() {
 }
 
 export async function customerReplyMessage(formData: FormData) {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   try {
     const customerId = await getCustomerId();
     const conversationIdStr = formData.get('conversationId') as string;

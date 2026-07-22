@@ -1,9 +1,13 @@
+import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function getAdminProductsForDeals() {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     const products = await prisma.product.findMany({
       select: {
@@ -44,6 +48,9 @@ export async function getAdminProductsForDeals() {
 }
 
 export async function updateProductDeal(productId: string, newSalePrice: string | null, newSaleEndDate: string | null) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   try {
     let parsedSalePrice = null;
     if (newSalePrice && newSalePrice.trim() !== '') {

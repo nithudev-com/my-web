@@ -1,3 +1,4 @@
+import { requireCustomerSession } from '@/lib/customer-auth';
 'use server';
 
 import { prisma } from '@/lib/prisma';
@@ -12,6 +13,9 @@ async function getAuthCustomerId() {
 }
 
 export async function saveAddress(formData: FormData) {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   const customerId = await getAuthCustomerId();
   if (!customerId) return { error: "Not authenticated" };
 
@@ -80,6 +84,9 @@ export async function saveAddress(formData: FormData) {
 }
 
 export async function deleteAddress(addressIdStr: string) {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   const customerId = await getAuthCustomerId();
   if (!customerId) return { error: "Not authenticated" };
 
@@ -100,6 +107,9 @@ export async function deleteAddress(addressIdStr: string) {
 }
 
 export async function setDefaultAddress(addressIdStr: string, type: 'shipping' | 'billing') {
+  const _customerSession = await requireCustomerSession();
+  if (!_customerSession) throw new Error("Unauthorized");
+
   const customerId = await getAuthCustomerId();
   if (!customerId) return { error: "Not authenticated" };
 

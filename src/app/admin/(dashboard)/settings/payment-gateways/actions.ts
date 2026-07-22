@@ -1,9 +1,13 @@
+import { requireAdminSession } from '@/lib/admin-auth';
 'use server';
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function getMonirizeGateway() {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   let gateway = await prisma.paymentGateway.findUnique({
     where: { name: 'Monirize' }
   });
@@ -34,6 +38,9 @@ export async function getMonirizeGateway() {
 }
 
 export async function updateMonirizeGateway(formData: FormData) {
+  const _adminSession = await requireAdminSession();
+  if (!_adminSession) throw new Error("Unauthorized");
+
   const merchantId = formData.get('merchantId') as string;
   const publicKey = formData.get('publicKey') as string;
   const secretKey = formData.get('secretKey') as string;
