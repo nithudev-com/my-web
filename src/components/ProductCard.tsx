@@ -100,12 +100,14 @@ export async function ProductCard({
       {/* Use Next.js Link for prefetching on hover */}
       <Link className="premium-card-image-link" href={`/product/${slug}`} prefetch={true}>
         {image ? (
-          <Image             src={image}
+          <Image 
+            src={image}
             alt={title}
             fill
-            sizes="(max-width: 768px) 50vw, 25vw"
+            sizes="(max-width: 480px) 50vw, (max-width: 1024px) 33vw, 25vw"
             style={{ objectFit: "contain", mixBlendMode: "multiply" }}
-           loader={shopifyLoader} />
+            loader={shopifyLoader} 
+          />
         ) : (
           <div
             style={{

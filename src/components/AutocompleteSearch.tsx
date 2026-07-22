@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function AutocompleteSearch({ isMobile, categories = [] }: { isMobile: boolean, categories?: any[] }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,7 +77,7 @@ export function AutocompleteSearch({ isMobile, categories = [] }: { isMobile: bo
               setSearchQuery("");
             }}
           >
-            <img src={item.mainImage || 'https://via.placeholder.com/48'} alt={item.title} className="search-suggestion-img" />
+            <Image src={item.mainImage || 'https://images.unsplash.com/photo-1596700540445-5f333fb9e9f1?w=48'} alt={item.title} width={48} height={48} className="search-suggestion-img" style={{ objectFit: 'cover' }} />
             <div className="search-suggestion-content">
               <h4 className="search-suggestion-title">{item.title}</h4>
               <div className="search-suggestion-price">${Number(item.basePrice).toFixed(2)}</div>

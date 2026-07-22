@@ -104,7 +104,7 @@ export function SlideOutCart() {
               <div key={`${cartItem.productId}-${cartItem.variantId || idx}`} style={{ display: 'flex', gap: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
                 <div style={{ width: '80px', height: '80px', position: 'relative', background: '#f8fafc', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
                   {imageUrl ? (
-                    <Image src={imageUrl} alt={title} fill style={{ objectFit: 'cover' }}  loader={shopifyLoader} />
+                    <Image src={imageUrl} alt={title} fill sizes="80px" style={{ objectFit: 'cover' }}  loader={shopifyLoader} />
                   ) : (
                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Img</div>
                   )}

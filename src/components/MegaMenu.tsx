@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Category {
   id: string;
@@ -371,7 +372,7 @@ export function MegaMenu({ categories, isOpen, onClose }: MegaMenuProps) {
                   <Link prefetch={true} href={`/category/${subCat.slug}`} className="mega-menu-subcat-card" onClick={onClose}>
                     <div className="mega-menu-subcat-img-wrapper">
                       {subCat.image ? (
-                        <img src={subCat.image} alt={subCat.name} className="mega-menu-subcat-img" />
+                        <Image src={subCat.image} alt={subCat.name} fill sizes="100px" style={{ objectFit: 'cover' }} className="mega-menu-subcat-img" />
                       ) : (
                         <div className="mega-menu-subcat-placeholder">🏷️</div>
                       )}
@@ -395,7 +396,7 @@ export function MegaMenu({ categories, isOpen, onClose }: MegaMenuProps) {
               <div className="mega-menu-empty-card">
                 <div className="mega-menu-empty-img-wrapper">
                   {activeCatData?.image ? (
-                    <img src={activeCatData.image} alt={activeCatData.name} className="mega-menu-empty-img" />
+                    <Image src={activeCatData.image} alt={activeCatData.name} fill sizes="200px" style={{ objectFit: 'cover' }} className="mega-menu-empty-img" />
                   ) : (
                     <div className="mega-menu-empty-placeholder">🏷️</div>
                   )}

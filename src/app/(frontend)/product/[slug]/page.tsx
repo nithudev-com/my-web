@@ -476,9 +476,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 >
                   <div style={{ aspectRatio: '16/9', background: '#f1f5f9', position: 'relative' }}>
                     {blog.coverImage ? (
-                      <Image src={blog.coverImage} alt={blog.title} fill style={{ objectFit: 'cover' }} />
+                      <Image src={blog.coverImage} alt={blog.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover' }} />
                     ) : product.mainImage ? (
-                      <Image src={product.mainImage} alt={blog.title} fill style={{ objectFit: 'cover' }} />
+                      <Image src={product.mainImage} alt={blog.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover' }} />
                     ) : null}
                   </div>
                   <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
