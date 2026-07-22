@@ -4,6 +4,8 @@ import { requireAdminSession } from '@/lib/admin-auth';
 import { redirect } from 'next/navigation';
 import "@/styles/admin.css";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({
   children,
 }: {

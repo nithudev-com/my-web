@@ -14,10 +14,17 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogIndexPage() {
-  const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: 'desc' }
-  });
+  let posts = [];
+  if (process.env.DATABASE_URL) {
+    try {
+      posts = await prisma.blogPost.findMany({
+        where: { isPublished: true },
+        orderBy: { createdAt: 'desc' }
+      });
+    } catch {
+      posts = [];
+    }
+  }
 
   return (
     <main style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '80px' }}>

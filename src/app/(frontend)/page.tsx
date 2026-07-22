@@ -12,13 +12,18 @@ export const revalidate = 900;
 
 const getFeaturedBrands = unstable_cache(
   async () => {
-    const brands = await prisma.brand.findMany({
-      where: { showOnHome: true },
-      select: { id: true, name: true, slug: true, logo: true },
-      orderBy: { name: "asc" },
-      take: 20,
-    });
-    return JSON.parse(JSON.stringify(brands, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    if (!process.env.DATABASE_URL) return [];
+    try {
+      const brands = await prisma.brand.findMany({
+        where: { showOnHome: true },
+        select: { id: true, name: true, slug: true, logo: true },
+        orderBy: { name: "asc" },
+        take: 20,
+      });
+      return JSON.parse(JSON.stringify(brands, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    } catch {
+      return [];
+    }
   },
   ['home-featured-brands'],
   { revalidate: 900, tags: ['home-data', 'brand-slug'] }
@@ -26,13 +31,18 @@ const getFeaturedBrands = unstable_cache(
 
 const getFeaturedCategories = unstable_cache(
   async () => {
-    const categories = await prisma.category.findMany({
-      where: { showOnHome: true },
-      select: { id: true, name: true, slug: true, image: true, seoTitle: true },
-      take: 16,
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-    });
-    return JSON.parse(JSON.stringify(categories, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    if (!process.env.DATABASE_URL) return [];
+    try {
+      const categories = await prisma.category.findMany({
+        where: { showOnHome: true },
+        select: { id: true, name: true, slug: true, image: true, seoTitle: true },
+        take: 16,
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      });
+      return JSON.parse(JSON.stringify(categories, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    } catch {
+      return [];
+    }
   },
   ['home-featured-categories'],
   { revalidate: 900, tags: ['home-data', 'category-slug'] }
@@ -40,8 +50,13 @@ const getFeaturedCategories = unstable_cache(
 
 const getCategoryCircles = unstable_cache(
   async () => {
-    const circles = await prisma.categoryCircle.findMany({ orderBy: { sortOrder: "asc" } });
-    return JSON.parse(JSON.stringify(circles, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    if (!process.env.DATABASE_URL) return [];
+    try {
+      const circles = await prisma.categoryCircle.findMany({ orderBy: { sortOrder: "asc" } });
+      return JSON.parse(JSON.stringify(circles, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    } catch {
+      return [];
+    }
   },
   ['home-category-circles'],
   { revalidate: 900, tags: ['home-data', 'category-slug'] }
@@ -53,13 +68,18 @@ const getReviewStats = async (productIdsString: string) => {
       const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
       if (ids.length === 0) return [];
       
-      const stats = await prisma.review.groupBy({
-        by: ["productId"],
-        where: { productId: { in: ids }, approved: true },
-        _avg: { rating: true },
-        _count: { rating: true },
-      });
-      return JSON.parse(JSON.stringify(stats, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+      if (!process.env.DATABASE_URL) return [];
+      try {
+        const stats = await prisma.review.groupBy({
+          by: ["productId"],
+          where: { productId: { in: ids }, approved: true },
+          _avg: { rating: true },
+          _count: { rating: true },
+        });
+        return JSON.parse(JSON.stringify(stats, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+      } catch {
+        return [];
+      }
     },
     [`home-review-stats-${productIdsString}`],
     { revalidate: 900, tags: ['home-data', 'products'] }
