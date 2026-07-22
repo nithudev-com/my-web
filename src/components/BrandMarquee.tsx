@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
+import { shopifyLoader } from "@/lib/image-loader";
 
 export function BrandMarquee({ brands }: { brands: any[] }) {
   if (!brands || brands.length === 0) return null;
@@ -24,7 +25,7 @@ export function BrandMarquee({ brands }: { brands: any[] }) {
             >
               <div className="brand-logo-wrapper" style={{ position: 'relative' }}>
                 {brand.logo ? (
-                  <Image src={brand.logo} alt="" fill style={{ objectFit: 'contain' }} className="brand-logo-img" sizes="120px" />
+                  <Image src={brand.logo} alt="" fill style={{ objectFit: 'contain' }} className="brand-logo-img" sizes="120px" loader={shopifyLoader} />
                 ) : (
                   <div className="brand-logo-placeholder">{brand.name.charAt(0)}</div>
                 )}

@@ -32,10 +32,9 @@ async function getStoreName() {
   }
 }
 
-export async function generateMetadata({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ page?: string, sort?: string, minPrice?: string, maxPrice?: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   try {
     const { slug } = await params;
-    const query = await searchParams;
     const normalizedSlug = normalizeBrandSlug(slug);
 
     if (isCategoryLikeBrand(normalizedSlug)) {
@@ -65,17 +64,13 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
       }
     }
 
-    const pageNum = Number(query.page || 1);
     const brandUrl = siteUrl(`/brand/${brand.slug}`);
-    const canonicalUrl = pageNum > 1 ? `${brandUrl}?page=${pageNum}` : brandUrl;
-
-    // Apply noindex if it's a filtered/sorted URL
-    const isFiltered = !!query.sort || !!query.minPrice || !!query.maxPrice;
+    const canonicalUrl = brandUrl;
 
     return {
       title: metaTitle,
       description: metaDesc,
-      robots: isFiltered ? { index: false, follow: true } : { index: true, follow: true },
+      robots: { index: true, follow: true },
       alternates: { canonical: canonicalUrl },
       openGraph: {
         title: metaTitle,

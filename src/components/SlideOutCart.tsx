@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { shopifyLoader } from "@/lib/image-loader";
 import { useCartContext } from '@/context/CartContext';
 import { revalidateCartTotals, RevalidatedCart } from '@/app/(frontend)/checkout/cart-actions';
 import { FreeShippingBar } from './FreeShippingBar';
