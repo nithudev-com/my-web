@@ -7,7 +7,9 @@ import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { SlideOutCart } from "@/components/SlideOutCart";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
-import { LiveChatWidget } from "@/components/LiveChatWidget";
+import dynamic from 'next/dynamic';
+
+const LiveChatWidget = dynamic(() => import('@/components/LiveChatWidget').then(mod => mod.LiveChatWidget), { ssr: false });
 
 const getCachedCategories = unstable_cache(
   async () => {

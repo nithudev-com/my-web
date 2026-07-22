@@ -1,7 +1,6 @@
-'use client';
-
 import Link from "next/link";
 import Image from "next/image";
+import { NewsletterForm } from "./NewsletterForm";
 
 export function Footer({ settings }: { settings: any }) {
   return (
@@ -86,10 +85,7 @@ export function Footer({ settings }: { settings: any }) {
             <p className="footer-desc" style={{ marginBottom: '0' }}>
               Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
             </p>
-            <form className="footer-newsletter-form" onSubmit={(e) => e.preventDefault()}>
-              <input type="email" placeholder="Enter your email..." className="footer-newsletter-input" required />
-              <button type="submit" className="footer-newsletter-btn">Join</button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
 
