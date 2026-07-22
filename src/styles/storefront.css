@@ -841,7 +841,7 @@ img {
   max-width: 480px;
   background: rgba(255, 255, 255, 0.85);
   /* optimized out for perf: backdrop-filter: blur(20px); */
-  -webkit-/* optimized out for perf: backdrop-filter: blur(20px); */
+  /* optimized out for perf: -webkit-backdrop-filter: blur(20px); */
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 24px;
   padding: 48px;

@@ -12,6 +12,7 @@ import { AddToCartButton } from "@/components/AddToCartButton";
 import { BuyNowButton } from "@/components/BuyNowButton";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductTabs } from "@/components/ProductTabs";
+import { Suspense } from "react";
 import { ProductActionBox } from "../components/ProductActionBox";
 import { ProductCard } from "@/components/ProductCard";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
@@ -121,6 +122,35 @@ export async function getRelatedProducts(categoryId: string | bigint | null, exc
   )();
 }
 
+async function RelatedProductsSection({ categoryId, excludeId }: { categoryId: string | bigint | null, excludeId: string | bigint }) {
+  if (!categoryId) return null;
+  const relatedProducts = await getRelatedProducts(categoryId, excludeId);
+  if (relatedProducts.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: '48px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
+      <h2 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '24px', color: '#0f172a' }}>You May Also Like</h2>
+      <div className="related-products-grid">
+        {relatedProducts.map((rp: any) => (
+          <ProductCard
+            key={rp.id.toString()}
+            id={rp.id.toString()}
+            title={rp.title}
+            slug={rp.slug}
+            image={rp.mainImage}
+            price={rp.basePrice.toString()}
+            salePrice={rp.salePrice?.toString()}
+            category={rp.category?.name}
+            brand={rp.brand?.name}
+            variantsCount={rp._count?.variants || 0}
+            stockQuantity={rp.stockQuantity}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
@@ -130,10 +160,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   if (!product) notFound();
 
-  // Related Products Query (Cached)
-
-
-  const relatedProducts = await getRelatedProducts(product.categoryId, product.id);
+  // Related products query is deferred and handled by the Suspense boundary below
 
   const faqs = parseFaqs(product.faq);
   const faqSchema = faqs.length > 0 ? faqJsonLd(faqs, siteUrl(`/product/${product.slug}`)) : null;
@@ -239,7 +266,33 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           )}
 
-          <ProductActionBox product={product} />
+          <ProductActionBox 
+            product={{
+              id: product.id.toString(),
+              title: product.title,
+              basePrice: product.basePrice.toString(),
+              salePrice: product.salePrice?.toString() || null,
+              stockQuantity: product.stockQuantity,
+              sku: product.sku,
+              barcode: product.barcode,
+              mainImage: product.mainImage,
+              shortDescription: product.shortDescription,
+              benefits: benefits,
+              brand: product.brand ? { name: product.brand.name, slug: product.brand.slug } : null,
+              category: product.category ? { name: product.category.name, slug: product.category.slug } : null,
+              variants: product.variants?.map((v: any) => ({
+                id: v.id.toString(),
+                sku: v.sku,
+                barcode: v.barcode,
+                title: v.title,
+                price: v.price.toString(),
+                salePrice: v.salePrice?.toString() || null,
+                stockQuantity: v.stockQuantity,
+                image: v.image,
+                attributes: v.attributes,
+              })) || []
+            }} 
+          />
 
           {/* Social Share */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
@@ -401,28 +454,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       />
 
       {/* RELATED PRODUCTS */}
-      {relatedProducts.length > 0 && (
-        <div style={{ marginTop: '48px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
-          <h2 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '24px', color: '#0f172a' }}>You May Also Like</h2>
-          <div className="related-products-grid">
-            {relatedProducts.map((rp: any) => (
-              <ProductCard
-                key={rp.id.toString()}
-                id={rp.id.toString()}
-                title={rp.title}
-                slug={rp.slug}
-                image={rp.mainImage}
-                price={rp.basePrice.toString()}
-                salePrice={rp.salePrice?.toString()}
-                category={rp.category?.name}
-                brand={rp.brand?.name}
-                variantsCount={rp._count?.variants || 0}
-                stockQuantity={rp.stockQuantity}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      <Suspense fallback={<div style={{ marginTop: '48px', padding: '40px 0', textAlign: 'center' }}>Loading related products...</div>}>
+        <RelatedProductsSection categoryId={product.categoryId} excludeId={product.id} />
+      </Suspense>
 
       {/* RELATED AI BLOGS (Custom styled grid from image) */}
       {relatedBlogs.length > 0 && (
