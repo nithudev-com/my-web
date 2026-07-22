@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogIndexPage() {
-  let posts = [];
+  let posts: any[] = [];
   if (process.env.DATABASE_URL) {
     try {
       posts = await prisma.blogPost.findMany({
