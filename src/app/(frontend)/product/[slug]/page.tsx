@@ -22,7 +22,7 @@ export const dynamicParams = true;
 
 export async function generateStaticParams() {
   try {
-    const products = await getTopProductSlugs(20); // Pre-build top 20, let ISR handle the rest
+    const products = await getTopProductSlugs(50); // Pre-build top 50 to cover homepage fully
     return products;
   } catch (e) {
     return [];
