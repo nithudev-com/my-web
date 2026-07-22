@@ -1,24 +1,22 @@
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrismaV7 = globalThis as unknown as { prisma?: PrismaClient };
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
+};
 
-// We must hardcode the URL because Hostinger's Auto Deploy system does NOT provide 
-// environment variables (like DATABASE_URL) to the "npm run build" process. 
-// Without this, Next.js fails to statically generate the pages during deployment.
-const fixedUrl = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=10&pool_timeout=20";
-
-process.env.DATABASE_URL = fixedUrl;
-process.env.DIRECT_URL = "postgresql://postgres.bxltfwydeszutzkovviw:Sathvika%402020@aws-0-ca-central-1.pooler.supabase.com:5432/postgres";
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is required");
+}
 
 export const prisma =
-  globalForPrismaV7.prisma ??
+  globalForPrisma.prisma ??
   new PrismaClient({
-    datasources: {
-      db: {
-        url: fixedUrl
-      }
-    },
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["warn", "error"]
+        : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrismaV7.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}

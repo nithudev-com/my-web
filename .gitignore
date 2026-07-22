@@ -1,9 +1,42 @@
-node_modules
-.next
+# Environment
 .env
-.env.local
-.DS_Store
-dist
-coverage
+.env.*
+!.env.example
+
+# Next.js
+.next/
+out/
+*.tar.gz
+
+# Databases
+*.sql
+*.rdb
+*.dump
+*.sqlite
+*.db
+
+# Logs and debug output
 *.log
+*_logs.txt
+build-*.txt
+page*.html
+admin_output.html
+product_error.html
+curl*.txt
+screenshot*.png
+
+# Deployment and SSH
+*.exp
+.ssh/
+*.pem
+*.key
+
+# Temporary files
+tmp/
+temp/
+.cache/
+node_modules/
+.DS_Store
+dist/
+coverage/
 storage/
