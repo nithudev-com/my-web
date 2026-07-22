@@ -13,6 +13,7 @@ export const revalidate = 1800;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
+  if (!process.env.DATABASE_URL) return [];
   try {
     const brands = await prisma.brand.findMany({ select: { slug: true }, take: 20 });
     return brands.map((b) => ({ slug: b.slug }));

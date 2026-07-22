@@ -10,35 +10,41 @@ import { ClientDrawers } from '@/components/ClientDrawers';
 
 const getCachedCategories = unstable_cache(
   async () => {
-    const data = await prisma.category.findMany({
-      where: { parentId: null },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        image: true,
-        children: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            image: true,
-            children: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              },
-              orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
-            }
-          },
-          orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
-        }
-      },
-      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-      take: 20
-    });
-    return JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    if (!process.env.DATABASE_URL) return [];
+    try {
+      const data = await prisma.category.findMany({
+        where: { parentId: null },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          image: true,
+          children: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              image: true,
+              children: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true
+                },
+                orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
+              }
+            },
+            orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
+          }
+        },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+        take: 20
+      });
+      return JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+    } catch (e) {
+      console.warn("Failed to get layout categories during build:", e);
+      return [];
+    }
   },
   ['layout-categories'],
   { revalidate: 3600, tags: ['menu-categories'] }

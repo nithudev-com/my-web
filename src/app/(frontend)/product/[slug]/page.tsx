@@ -22,6 +22,7 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
+  if (!process.env.DATABASE_URL) return [];
   try {
     const products = await getTopProductSlugs(50); // Pre-build top 50 to cover homepage fully
     return products;

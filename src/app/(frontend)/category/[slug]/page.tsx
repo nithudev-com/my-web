@@ -13,10 +13,15 @@ export const revalidate = 1800;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const categories = await getSitemapCategories();
-  return categories.map((cat) => ({
-    slug: cat.slug,
-  }));
+  if (!process.env.DATABASE_URL) return [];
+  try {
+    const categories = await getSitemapCategories();
+    return categories.map((cat) => ({
+      slug: cat.slug,
+    }));
+  } catch (e) {
+    return [];
+  }
 }
 
 
