@@ -37,7 +37,7 @@ export default async function BlogIndexPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
             {posts.map(post => (
               <Link key={post.id.toString()} href={`/blog/${post.slug}`} style={{ background: '#fff', borderRadius: '16px', overflow: 'hidden', textDecoration: 'none', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.04)', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }} className="blog-card-hover">
-                <style dangerouslySetInnerHTML={{ __html: `.blog-card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }` }} />
+                
                 <div style={{ width: '100%', aspectRatio: '16/9', background: '#e2e8f0', position: 'relative' }}>
                   {post.coverImage ? (
                     <img src={post.coverImage} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

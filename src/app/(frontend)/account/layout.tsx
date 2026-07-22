@@ -27,64 +27,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
         </main>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Global Dashboard Card Styles for children to inherit safely */
-        .dashboard-card {
-          background: #FFFFFF;
-          border-radius: 20px;
-          border: 1px solid #F0DDE5;
-          padding: 32px;
-          box-shadow: 0 4px 12px rgba(115, 12, 99, 0.03);
-          margin-bottom: 24px;
-        }
-        .dashboard-card-title {
-          font-size: 20px;
-          font-weight: 800;
-          color: #730C63;
-          margin-bottom: 24px;
-        }
-        .dashboard-btn-primary {
-          background: #D63062;
-          color: #FFFFFF;
-          padding: 12px 24px;
-          border-radius: 12px;
-          font-weight: 700;
-          text-decoration: none;
-          display: inline-block;
-          border: none;
-          cursor: pointer;
-          transition: 0.2s;
-        }
-        .dashboard-btn-primary:hover {
-          background: #E71C25;
-          transform: translateY(-2px);
-        }
-
-        @media (max-width: 900px) {
-          .dashboard-card {
-            padding: 24px 16px !important;
-            border-radius: 16px;
-          }
-          .dashboard-layout-wrapper {
-            padding: 16px !important;
-            padding-bottom: 100px !important;
-          }
-          .dashboard-flex-header {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 16px;
-            padding: 20px 16px !important;
-          }
-          .dashboard-table th, .dashboard-table td {
-            padding: 16px !important;
-          }
-        }
-      `}} />
+      
     </div>
   );
 }

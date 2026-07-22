@@ -1,0 +1,17 @@
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --primary: #111827;
+  --accent: #2563eb;
+}
+:root {
+  --brand-primary: #D63062;
+  --brand-accent: #E71C25;
+  --brand-deep: #730C63;
+  --brand-black: #111111;
+  --brand-white: #FFFFFF;
+  --brand-soft: #FFF4F7;
+}

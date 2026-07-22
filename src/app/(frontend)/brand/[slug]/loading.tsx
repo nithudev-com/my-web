@@ -53,13 +53,7 @@ export default function LoadingBrand() {
         </div>
       </section>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media (min-width: 900px) {
-          .skeleton-sidebar {
-            display: flex !important;
-          }
-        }
-      `}} />
+      
     </main>
   );
 }

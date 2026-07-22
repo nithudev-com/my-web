@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="auth-wrapper">
-      <style dangerouslySetInnerHTML={{__html: "@keyframes spin { 100% { transform: rotate(360deg); } }"}} />
+      
       
       <div className="auth-bg-glow"></div>
       <div className="auth-shape-1"></div>

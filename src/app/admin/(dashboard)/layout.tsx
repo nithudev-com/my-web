@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { AdminHeader } from '@/components/admin/AdminHeader';
+import "@/styles/admin.css";
 
 export default function AdminLayout({
   children,

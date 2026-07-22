@@ -41,14 +41,7 @@ export function ContactForm({ customer, orders }: ContactFormProps) {
 
   return (
     <div className="contact-form-card" style={{ background: '#FFFFFF', borderRadius: '24px', boxShadow: '0 20px 40px rgba(115,12,99,0.06)', border: '1px solid #F0DDE5', animation: 'fadeInUp 0.6s ease forwards' }}>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .contact-form-card { padding: 40px; }
-        .contact-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 768px) {
-          .contact-form-card { padding: 24px 16px; }
-          .contact-form-row { grid-template-columns: 1fr; }
-        }
-      `}} />
+      
       {errorMsg && (
         <div style={{ padding: '16px', background: '#fef2f2', color: '#ef4444', borderRadius: '12px', border: '1px solid #fca5a5', marginBottom: '24px', fontWeight: '600' }}>
           {errorMsg}

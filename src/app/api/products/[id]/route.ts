@@ -12,9 +12,22 @@ export async function DELETE(
     // Parse the id to BigInt since Prisma schema uses BigInt for ID
     const productId = BigInt(id);
 
-    await prisma.product.delete({
+    const deletedProduct = await prisma.product.delete({
       where: { id: productId },
+      include: { category: { select: { slug: true } }, brand: { select: { slug: true } } }
     });
+
+    if (deletedProduct.slug) {
+      revalidateTag(`product-slug:${deletedProduct.slug}`);
+    }
+    if (deletedProduct.category?.slug) {
+      revalidateTag(`category-slug:${deletedProduct.category.slug}`);
+    }
+    if (deletedProduct.brand?.slug) {
+      revalidateTag(`brand-slug:${deletedProduct.brand.slug}`);
+    }
+    revalidateTag('home-products');
+    revalidateTag('filtered-products');
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -110,15 +123,24 @@ export async function PUT(
       },
       include: {
         variants: true,
-        images: true
+        images: true,
+        category: { select: { slug: true } },
+        brand: { select: { slug: true } }
       }
     });
 
-    // Invalidate ISR caches so changes reflect immediately on the frontend
-    revalidateTag('products');
+    // Invalidate ISR caches selectively
     if (updatedProduct.slug) {
-      revalidateTag(`product:${updatedProduct.slug}`);
+      revalidateTag(`product-slug:${updatedProduct.slug}`);
     }
+    if (updatedProduct.category?.slug) {
+      revalidateTag(`category-slug:${updatedProduct.category.slug}`);
+    }
+    if (updatedProduct.brand?.slug) {
+      revalidateTag(`brand-slug:${updatedProduct.brand.slug}`);
+    }
+    revalidateTag('home-products');
+    revalidateTag('filtered-products');
 
     // BigInt cannot be serialized by default Next.js JSON, we must convert it
     const safeProduct = {

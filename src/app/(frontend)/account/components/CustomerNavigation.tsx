@@ -51,16 +51,7 @@ export function CustomerNavigation() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .sidebar-link:hover { background: #FFF4F7; color: #D63062 !important; }
-        .mobile-nav { display: none; }
-        .desktop-sidebar { display: block; }
-        
-        @media (max-width: 900px) {
-          .desktop-sidebar { display: none; }
-          .mobile-nav { display: flex; }
-        }
-      `}} />
+      
 
       {/* Desktop Sidebar */}
       <aside className="desktop-sidebar" style={{ width: '280px', flexShrink: 0 }}>
@@ -129,10 +120,7 @@ export function CustomerNavigation() {
         </div>
       )}
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideLeft { from { transform: translateX(100%); } to { transform: translateX(0); } }
-      `}} />
+      
     </>
   );
 }

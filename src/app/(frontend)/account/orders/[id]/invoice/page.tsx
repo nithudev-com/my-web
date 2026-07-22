@@ -30,59 +30,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh' }}>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .invoice-body {
-          font-family: var(--font-plus-jakarta), sans-serif;
-          color: #0f172a;
-          line-height: 1.5;
-        }
-        
-        .invoice-container {
-          max-width: 210mm; /* A4 Width */
-          min-height: 297mm; /* A4 Height */
-          margin: 40px auto;
-          background: #ffffff;
-          padding: 15mm 20mm;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .invoice-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 32px;
-        }
-        
-        .invoice-table th {
-          background: #f1f5f9;
-          color: #475569;
-          padding: 12px;
-          text-align: left;
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          border-bottom: 2px solid #cbd5e1;
-        }
-
-        .invoice-table td {
-          padding: 16px 12px;
-          border-bottom: 1px solid #e2e8f0;
-          font-size: 14px;
-        }
-
-        @media print {
-          body, html { margin: 0; padding: 0; background: #ffffff !important; }
-          .no-print { display: none !important; }
-          .invoice-container { 
-            margin: 0; 
-            padding: 15mm; 
-            box-shadow: none; 
-            max-width: 100%; 
-            min-height: 100%; 
-          }
-          /* Force backgrounds to print */
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        }
-      `}} />
+      
 
       <PrintButton />
 

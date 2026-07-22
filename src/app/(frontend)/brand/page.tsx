@@ -61,31 +61,7 @@ export default async function BrandIndexPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(to bottom, #f8fafc, #e0f2fe)', paddingBottom: '80px', position: 'relative', overflow: 'hidden' }}>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .seawater-bubble {
-          position: absolute;
-          bottom: -50px;
-          background: rgba(255, 255, 255, 0.5);
-          border: 1px solid rgba(255, 255, 255, 0.7);
-          border-radius: 50%;
-          animation: floatUp linear infinite;
-          z-index: 1;
-        }
-        @keyframes floatUp {
-          0% {
-            transform: translateY(0) scale(1);
-            opacity: 0.8;
-          }
-          50% {
-            transform: translateY(-50vh) scale(1.2);
-            opacity: 0.5;
-          }
-          100% {
-            transform: translateY(-120vh) scale(0.8);
-            opacity: 0;
-          }
-        }
-      `}} />
+      
       {bubbles}
       
       {/* MASSIVE HERO SECTION */}

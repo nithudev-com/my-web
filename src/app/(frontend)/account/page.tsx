@@ -201,18 +201,7 @@ export default async function AccountDashboardPage() {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .quick-action:hover {
-          border-color: #D63062 !important;
-          background: #ffffff !important;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(214, 48, 98, 0.08);
-        }
-        .product-card:hover {
-          border-color: #D63062;
-          box-shadow: 0 4px 12px rgba(214, 48, 98, 0.08);
-        }
-      `}} />
+      
     </div>
   );
 }

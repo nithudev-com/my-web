@@ -84,14 +84,7 @@ export function ProductActionBox({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .action-btns-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .meta-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; }
-        @media (max-width: 640px) {
-          .action-btns-grid { grid-template-columns: 1fr; }
-          .meta-info-grid { grid-template-columns: 1fr; gap: 12px; }
-        }
-      `}} />
+      
       
       {/* Pricing and Wishlist */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

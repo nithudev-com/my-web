@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
+import "@/styles/storefront.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getStoreSettings } from "@/services/settings";
@@ -44,7 +45,7 @@ const getCachedCategories = unstable_cache(
     return JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v));
   },
   ['layout-categories'],
-  { revalidate: 3600, tags: ['categories'] }
+  { revalidate: 3600, tags: ['menu-categories'] }
 );
 
 export default async function StoreLayout({

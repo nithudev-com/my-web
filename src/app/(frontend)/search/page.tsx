@@ -67,71 +67,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <main className="shop-page-wrapper">
-      <style dangerouslySetInnerHTML={{ __html: `
-        .shop-page-wrapper {
-          background: #ffffff;
-          min-height: 100vh;
-          padding-bottom: 80px; /* Space for bottom nav */
-        }
-        .shop-mobile-container {
-          padding: 16px;
-        }
-        .category-scroll-container {
-          display: flex;
-          overflow-x: auto;
-          gap: 12px;
-          padding: 0 16px 16px 16px;
-          margin-bottom: 16px;
-          scrollbar-width: none; /* Firefox */
-        }
-        .category-scroll-container::-webkit-scrollbar {
-          display: none; /* Chrome/Safari */
-        }
-        .category-pill {
-          white-space: nowrap;
-          padding: 10px 20px;
-          border-radius: 24px;
-          font-size: 13px;
-          font-weight: 700;
-          color: #475569;
-          background: #f8fafc;
-          text-decoration: none;
-          transition: 0.2s ease;
-        }
-        .category-pill.active {
-          background: #FBBF24; /* Bright warm yellow */
-          color: #000000;
-        }
-        .shop-product-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
-          padding: 0 16px;
-        }
-        @media (min-width: 768px) {
-          .shop-product-grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            padding: 0;
-          }
-          .shop-mobile-container {
-            padding: 32px 0;
-          }
-          .category-scroll-container {
-            padding: 0 0 24px 0;
-            flex-wrap: wrap;
-          }
-        }
-        @media (max-width: 768px) {
-          .shop-mobile-container { padding: 0 16px; }
-          .grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
-        }
-        @media (min-width: 1024px) {
-          .shop-product-grid {
-            grid-template-columns: repeat(4, 1fr);
-          }
-        }
-      `}} />
+      
 
       <SearchHeader initialQuery={searchKeyword} />
 

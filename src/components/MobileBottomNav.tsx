@@ -72,77 +72,7 @@ export function MobileBottomNav() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .mobile-bottom-nav {
-          display: none;
-        }
-        @media (max-width: 768px) {
-          .mobile-bottom-nav {
-            display: flex;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #fff;
-            border-top: 1px solid #e2e8f0;
-            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
-            padding-bottom: env(safe-area-inset-bottom, 0px);
-            z-index: 10000;
-            justify-content: space-around;
-            align-items: center;
-          }
-          body {
-            padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important;
-          }
-          .mobile-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 8px;
-            text-decoration: none;
-            color: #64748b; /* Inactive color */
-            position: relative;
-            background: transparent;
-            border: none;
-            font-family: inherit;
-            cursor: pointer;
-            width: 100%;
-            transition: color 0.2s ease;
-            -webkit-tap-highlight-color: transparent;
-          }
-          .mobile-nav-item:active {
-            opacity: 0.7;
-          }
-          .mobile-nav-item.active {
-            color: #0f172a; /* Active color black */
-          }
-          .mobile-nav-icon {
-            margin-bottom: 4px;
-            display: flex;
-            position: relative;
-          }
-          .mobile-nav-label {
-            font-size: 11px;
-            font-weight: 700;
-          }
-          .mobile-nav-badge {
-            position: absolute;
-            top: -6px;
-            right: -8px;
-            background: #FBBF24; /* Bright warm yellow */
-            color: #000;
-            font-size: 10px;
-            font-weight: 800;
-            border-radius: 10px;
-            padding: 2px 5px;
-            min-width: 16px;
-            text-align: center;
-            line-height: 1.2;
-            border: 2px solid #fff;
-          }
-        }
-      `}} />
+      
       <nav className="mobile-bottom-nav">
         {navItems.map((item) => {
           const isActive = item.href ? (item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)) : false;

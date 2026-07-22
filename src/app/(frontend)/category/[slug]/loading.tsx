@@ -46,17 +46,7 @@ export default function LoadingCategory() {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media (min-width: 1024px) {
-          .desktop-sidebar-skeleton { display: block !important; }
-        }
-        @media (max-width: 600px) {
-          .skeleton-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px !important;
-          }
-        }
-      `}} />
+      
     </div>
   );
 }

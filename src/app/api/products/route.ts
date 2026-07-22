@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import slugify from 'slugify';
+import { revalidateTag } from 'next/cache';
 
 export async function POST(request: Request) {
   try {
@@ -84,8 +85,19 @@ export async function POST(request: Request) {
       include: {
         variants: true,
         images: true,
+        category: { select: { slug: true } },
+        brand: { select: { slug: true } }
       }
     });
+
+    if (newProduct.category?.slug) {
+      revalidateTag(`category-slug:${newProduct.category.slug}`);
+    }
+    if (newProduct.brand?.slug) {
+      revalidateTag(`brand-slug:${newProduct.brand.slug}`);
+    }
+    revalidateTag('home-products');
+    revalidateTag('filtered-products');
 
     // BigInt cannot be serialized natively
     const safeProduct = {

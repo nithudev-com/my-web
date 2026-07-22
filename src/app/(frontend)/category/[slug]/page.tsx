@@ -33,30 +33,32 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-const getCategoryPageData = unstable_cache(
-  async (categoryId: string | bigint, productIdsString: string) => {
-    const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
-    const [subcategories, reviewStats] = await Promise.all([
-      prisma.category.findMany({
-        where: { parentId: BigInt(categoryId) },
-        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-        select: { id: true, name: true, slug: true, image: true }
-      }),
-      ids.length > 0
-        ? prisma.review.groupBy({
-            by: ['productId'],
-            where: { productId: { in: ids }, approved: true },
-            _avg: { rating: true },
-            _count: { rating: true },
-          })
-        : Promise.resolve([]),
-    ]);
-    const serialize = (obj: any) => JSON.parse(JSON.stringify(obj, (k, v) => typeof v === 'bigint' ? v.toString() : v));
-    return serialize({ subcategories, reviewStats });
-  },
-  ['category-page-data'],
-  { revalidate: 1800, tags: ['categories', 'reviews'] }
-);
+export async function getCategoryPageData(categoryId: string | bigint, productIdsString: string) {
+  return unstable_cache(
+    async () => {
+      const ids = productIdsString ? productIdsString.split(',').map(BigInt) : [];
+      const [subcategories, reviewStats] = await Promise.all([
+        prisma.category.findMany({
+          where: { parentId: BigInt(categoryId) },
+          orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+          select: { id: true, name: true, slug: true, image: true }
+        }),
+        ids.length > 0
+          ? prisma.review.groupBy({
+              by: ['productId'],
+              where: { productId: { in: ids }, approved: true },
+              _avg: { rating: true },
+              _count: { rating: true },
+            })
+          : Promise.resolve([]),
+      ]);
+      const serialize = (obj: any) => JSON.parse(JSON.stringify(obj, (k, v) => typeof v === 'bigint' ? v.toString() : v));
+      return serialize({ subcategories, reviewStats });
+    },
+    [`category-page-data-${categoryId.toString()}-${productIdsString}`],
+    { revalidate: 1800, tags: [`category:${categoryId.toString()}`, 'reviews'] }
+  )();
+}
 
 export default async function CategoryPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string, minPrice?: string, maxPrice?: string, sort?: string, brand?: string }> }) {
   const { slug } = await params;
@@ -86,62 +88,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
 
   return (
     <main className="container">
-      <style dangerouslySetInnerHTML={{ __html: `
-        .category-showcase-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-          margin-bottom: 40px;
-        }
-        .category-showcase-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-decoration: none;
-          color: inherit;
-        }
-        .category-showcase-image-wrapper {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          overflow: hidden;
-          background-color: #f1f5f9;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 8px;
-          border: 2px solid transparent;
-          transition: border-color 0.2s ease;
-        }
-        .category-showcase-item:hover .category-showcase-image-wrapper {
-          border-color: #facc15;
-        }
-        .category-showcase-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        .category-showcase-title {
-          font-size: 13px;
-          font-weight: 600;
-          text-align: center;
-          line-height: 1.2;
-          color: #334155;
-        }
-        @media (min-width: 768px) {
-          .category-showcase-grid {
-            grid-template-columns: repeat(6, 1fr);
-            gap: 24px;
-          }
-          .category-showcase-image-wrapper {
-            width: 120px;
-            height: 120px;
-          }
-          .category-showcase-title {
-            font-size: 15px;
-          }
-        }
-      ` }} />
+      
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(categoryJsonLd(category)) }} />
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: '900', margin: '0 0 8px 0', letterSpacing: '-0.03em' }}>{category.name}</h1>

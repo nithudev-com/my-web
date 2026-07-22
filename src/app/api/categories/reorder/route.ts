@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     );
 
     // Revalidate frontend caches to reflect the new hierarchy
-    revalidateTag("categories");
+    revalidateTag("menu-categories");
     revalidatePath("/");
     revalidatePath("/admin/categories");
 

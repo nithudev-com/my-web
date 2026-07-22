@@ -95,29 +95,31 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-const getRelatedProducts = unstable_cache(
-  async (categoryId: string | bigint | null, excludeId: string | bigint) => {
-    if (!categoryId) return [];
-    return prisma.product.findMany({
-      where: { categoryId: BigInt(categoryId), id: { not: BigInt(excludeId) }, status: 'ACTIVE' },
-      take: 4,
-      select: { 
-        id: true, 
-        title: true, 
-        slug: true, 
-        mainImage: true, 
-        basePrice: true, 
-        salePrice: true,
-        stockQuantity: true,
-        category: { select: { name: true } },
-        brand: { select: { name: true } },
-        _count: { select: { variants: true } }
-      }
-    }).then(data => JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v)));
-  },
-  ['related-products-cache'],
-  { revalidate: 3600, tags: ['products'] }
-);
+export async function getRelatedProducts(categoryId: string | bigint | null, excludeId: string | bigint) {
+  if (!categoryId) return [];
+  return unstable_cache(
+    async () => {
+      return prisma.product.findMany({
+        where: { categoryId: BigInt(categoryId), id: { not: BigInt(excludeId) }, status: 'ACTIVE' },
+        take: 4,
+        select: { 
+          id: true, 
+          title: true, 
+          slug: true, 
+          mainImage: true, 
+          basePrice: true, 
+          salePrice: true,
+          stockQuantity: true,
+          category: { select: { name: true } },
+          brand: { select: { name: true } },
+          _count: { select: { variants: true } }
+        }
+      }).then(data => JSON.parse(JSON.stringify(data, (k, v) => typeof v === 'bigint' ? v.toString() : v)));
+    },
+    [`related-products-${categoryId.toString()}-${excludeId.toString()}`],
+    { revalidate: 3600, tags: [`category:${categoryId.toString()}`] }
+  )();
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -177,39 +179,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <main className="container" style={{ paddingBottom: '90px', paddingTop: '16px', position: 'relative' }}>
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .mobile-only-title { display: none; }
-        .desktop-only-title { display: block; }
-        @media (max-width: 1024px) {
-          .pdp-grid { grid-template-columns: 1fr 1fr !important; }
-          .pdp-sidebar { grid-column: 1 / -1; }
-        }
-        @media (max-width: 768px) {
-          .pdp-grid { grid-template-columns: 1fr !important; }
-          .pdp-sticky-gallery { position: static !important; }
-          .mobile-only-title { display: block; margin-bottom: 24px; }
-          .desktop-only-title { display: none !important; }
-        }
-        
-        /* Farmart specific styles */
-        .farmart-meta-item { display: flex; gap: 8px; color: #475569; font-size: 14px; margin-bottom: 8px; }
-        .farmart-meta-item strong { color: #0f172a; font-weight: 700; width: 80px; }
-        
-        .farmart-sidebar-card { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
-        .farmart-sidebar-icon { color: #f59e0b; flex-shrink: 0; }
-        .farmart-sidebar-title { font-weight: 700; font-size: 15px; color: #0f172a; margin-bottom: 4px; }
-        .farmart-sidebar-desc { color: #64748b; font-size: 13px; line-height: 1.5; }
-
-        .bottom-cta {
-          position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
-          backdrop-filter: blur(16px); border-top: 1px solid rgba(226, 232, 240, 0.8); padding: 16px;
-          display: flex; justify-content: space-between; align-items: center; z-index: 100;
-          transform: translateY(100%); animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 1.5s;
-          box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
-        }
-        @keyframes slideUp { to { transform: translateY(0); } }
-      `}} />
+      
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
@@ -518,23 +488,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
       </div>
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        @media (min-width: 600px) { .cta-text { display: block !important; } }
-        
-        .related-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
-        
-        .premium-prose p { margin-top: 0; margin-bottom: 1.5em; }
-        .premium-prose ul { padding-left: 20px; margin-bottom: 1.5em; }
-        .premium-prose li { margin-bottom: 0.5em; }
-        .premium-prose h2, .premium-prose h3, .premium-prose h4 { color: #0f172a; font-weight: 800; margin-top: 2em; margin-bottom: 1em; }
-
-        @media (max-width: 600px) {
-          .related-products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        }
-
-        .related-blog-card:hover { border-color: #a855f7 !important; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(168, 85, 247, 0.15); }
-      `}} />
+      
     </main>
   );
 }

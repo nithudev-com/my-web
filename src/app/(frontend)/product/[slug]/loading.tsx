@@ -35,16 +35,7 @@ export default function LoadingProduct() {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .product-layout-skeleton {
-          grid-template-columns: 1fr;
-        }
-        @media (min-width: 900px) {
-          .product-layout-skeleton {
-            grid-template-columns: 1fr 1fr;
-          }
-        }
-      `}} />
+      
     </div>
   );
 }

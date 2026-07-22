@@ -107,12 +107,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
 
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes scaleIn {
-          0% { transform: scale(0.5); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-      `}} />
+      
     </div>
   );
 }

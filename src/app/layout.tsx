@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
-// @ts-ignore
-import { globalCss } from "./globalsStyles";
+import "@/styles/tokens.css";
+import "@/styles/reset.css";
 import { Toaster } from "react-hot-toast";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -32,7 +32,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${plusJakarta.variable} ${playfair.variable}`}>
       <head>
-        <style dangerouslySetInnerHTML={{ __html: globalCss }} />
         <link rel="preconnect" href="https://cdn.shopify.com" />
         <link rel="dns-prefetch" href="https://cdn.shopify.com" />
       </head>

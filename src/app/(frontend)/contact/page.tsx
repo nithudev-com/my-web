@@ -37,18 +37,7 @@ export default async function ContactPage() {
 
   return (
     <div className="contact-container" style={{ background: '#f8fafc', minHeight: '100vh' }}>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .contact-container { padding: 64px 24px; }
-        .contact-title { font-size: 48px; font-weight: 900; color: #111111; line-height: 1.1; margin-bottom: 24px; letter-spacing: -0.04em; }
-        .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr)); gap: 48px; align-items: start; }
-        .contact-info-col { position: sticky; top: 120px; z-index: 10; background: transparent; }
-        @media (max-width: 768px) {
-          .contact-container { padding: 32px 16px; }
-          .contact-title { font-size: 32px; }
-          .contact-grid { gap: 32px; }
-          .contact-info-col { position: static; z-index: auto; background: transparent; }
-        }
-      `}} />
+      
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         
         <div className="contact-grid">
