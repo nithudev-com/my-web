@@ -750,6 +750,23 @@ export default function EditProductForm({ product }: { product: any }) {
               </div>
             </div>
           </div>
+          
+          {/* Google Merchant Section */}
+          <div className="card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0 }}>Google Merchant Center</h3>
+            </div>
+            <p style={{ color: '#475569', marginBottom: '16px', fontSize: '14px' }}>
+              Configure how this product appears in Google Shopping and other Google surfaces.
+            </p>
+            <a 
+              href={`/admin/products/${product.id}/google-merchant`} 
+              className="button"
+              style={{ background: '#2563eb', color: 'white', textDecoration: 'none', display: 'inline-block' }}
+            >
+              Manage Google Merchant Settings
+            </a>
+          </div>
         </div>
 
         {/* RIGHT SIDEBAR */}
